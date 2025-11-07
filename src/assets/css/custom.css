@@ -1,0 +1,48 @@
+.turf-img-container {
+  height: 200px;
+  display: flex;
+  justify-content: center; 
+  align-items: center;
+  overflow: hidden;
+ border-radius: 0.5rem 0.5rem 0 0; 
+}
+
+.turf-img-container img {
+  width: auto;      
+  height: 100%;     
+  object-fit: cover; 
+}
+
+
+body {
+  background: #e9ecef; 
+  color: #212529;
+  padding-top: 64px;    
+  margin: 0;
+  min-height: 100vh;
+}
+
+.container {
+  max-width: 1400px;    
+}
+
+.card {
+  background: #fff;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.03), 0 1.5px 8px rgba(0,0,0,0.03);
+  border: 1px solid #e5e8eb;
+}
+
+.navbar {
+  padding-top: 0.0rem;   
+  padding-bottom: 0.0rem;
+  margin: 0%;
+  min-height: '1rem';      
+}
+
+.navbar-brand img {
+  height: 100%;           
+  max-height: 30px;       
+  width: auto; 
+  margin-left: -5%;          
+}

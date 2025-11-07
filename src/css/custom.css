@@ -1,0 +1,29 @@
+
+
+ #features .card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+} 
+
+ #features .card:hover {
+  transform: scale(1.05);  
+  box-shadow: 0 6px 20px rgba(0,0,0,0.15); 
+} 
+  
+ .turf-card:hover {
+  transform: scale(1.03);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+}
+.hero > .container { position: relative; z-index: 1; }
+body {
+  margin: 0;              
+  padding: 0;
+}
+#container-center{
+  position:'absolute';
+  left:'7%';
+  top:'18%';
+} 
+ .hero { min-height: 80vh; position: relative; color: #fff; }
+.hero::before { content:""; position:absolute; inset:0; background: rgba(0,0,0,.35); }
+.hero > .container { position: relative; z-index: 1; }
