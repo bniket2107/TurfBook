@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Navbar from "../components/Navbar";  // Import Navbar component
-import { setUser } from "../utils/auth";   // Import utility for handling user registration
+import { setUser } from "../utils/Auth.js";   // Import utility for handling user registration
 import { Modal } from "react-bootstrap";   // For Bootstrap modal
 import { useNavigate } from "react-router-dom"; // For navigation
 

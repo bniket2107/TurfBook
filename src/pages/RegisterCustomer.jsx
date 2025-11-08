@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import Navbar from "../components/Navbar.jsx";
 import Footer from "../components/Footer.jsx";
-import { setUser } from "../utils/auth.js";
-
+// import { setUser } from "../utils/Auth.js";
+import { setUser } from "../utils/Auth.js";
 const RegisterCustomer = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");

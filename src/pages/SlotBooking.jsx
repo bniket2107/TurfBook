@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import Navbar from "../components/Navbar";
-import { getToken } from "../utils/auth";
+import { getToken } from "../utils/Auth.js";
+// import { getToken } from "../utils/Auth";
 
 // Placeholders for frozen data, ideally fetched from backend for selected turf + date
 const demoFrozenData = {
