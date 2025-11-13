@@ -21,6 +21,7 @@ const OwnerAddTurf = () => {
   const [turfName, setTurfName] = useState("");
   const [turfImage, setTurfImage] = useState(null);
   const [pricePerHour, setPricePerHour] = useState("");
+  const [tournamentPrice, setTournamentPrice] = useState(""); // New field state
   const [state, setState] = useState("");
   const [city, setCity] = useState("");
   const [area, setArea] = useState("");
@@ -64,7 +65,7 @@ const OwnerAddTurf = () => {
   return (
     <>
       <Navbar />
-      <main className="container py-5" style={{ maxWidth: "720px", marginTop:"-4%"}}>
+      <main className="container py-5" style={{ maxWidth: "720px", marginTop: "-4%" }}>
         <h1 className="h4 mt-3 mb-4 text-center">Add Turf</h1>
         <div className="card">
           <div className="card-body">
@@ -72,47 +73,124 @@ const OwnerAddTurf = () => {
               <div className="row g-3">
                 <div className="col-12">
                   <label className="form-label">Turf Name</label>
-                  <input className="form-control" required value={turfName} onChange={e=>setTurfName(e.target.value)} />
+                  <input
+                    className="form-control"
+                    required
+                    value={turfName}
+                    onChange={(e) => setTurfName(e.target.value)}
+                  />
                 </div>
                 <div className="col-6">
                   <label className="form-label">Upload Turf Image</label>
-                  <input type="file" className="form-control" accept="image/*" required onChange={handleImageChange} />
+                  <input
+                    type="file"
+                    className="form-control"
+                    accept="image/*"
+                    required
+                    onChange={handleImageChange}
+                  />
                   <small className="text-muted">You can upload only 1 image up to 5 MB.</small>
                 </div>
                 <div className="col-6">
                   <label className="form-label">Price per Hour (₹)</label>
-                  <input type="number" className="form-control" min="0" required value={pricePerHour} onChange={e=>setPricePerHour(e.target.value)} />
+                  <input
+                    type="number"
+                    className="form-control"
+                    min="0"
+                    required
+                    value={pricePerHour}
+                    onChange={(e) => setPricePerHour(e.target.value)}
+                  />
                 </div>
-                <div className="col-4">
+
+                {/* New tournament price field side by side with price per hour */}
+                <div className="col-md-6">
+                  <label className="form-label">Tournament Price / hour (optional)</label>
+                  <div className="input-group">
+                    <span className="input-group-text">₹</span>
+                    <input
+                      id="tournamentPrice"
+                      type="number"
+                      className="form-control"
+                      value={tournamentPrice}
+                      onChange={(e) => setTournamentPrice(e.target.value)}
+                      min="0"
+                      step="0.01"
+                      placeholder="e.g. 1500"
+                    />
+                  </div>
+                  <div className="form-text">Leave blank to disable tournament slot booking.</div>
+                </div>
+
+                <div className="col-6">
                   <label className="form-label">State</label>
-                  <select className="form-select" required value={state} onChange={e=>setState(e.target.value)}>
+                  <select
+                    className="form-select"
+                    required
+                    value={state}
+                    onChange={(e) => setState(e.target.value)}
+                  >
                     <option value="">Select State</option>
-                    {Object.keys(stateCityMap).map(s => <option key={s} value={s}>{s}</option>)}
+                    {Object.keys(stateCityMap).map((s) => (
+                      <option key={s} value={s}>
+                        {s}
+                      </option>
+                    ))}
                   </select>
                 </div>
-                <div className="col-4">
+                <div className="col-6">
                   <label className="form-label">City</label>
-                  <select className="form-select" required value={city} onChange={e=>setCity(e.target.value)} disabled={!cityOptions.length}>
+                  <select
+                    className="form-select"
+                    required
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                    disabled={!cityOptions.length}
+                  >
                     <option value="">Select City</option>
-                    {cityOptions.map(c => <option key={c} value={c}>{c}</option>)}
+                    {cityOptions.map((c) => (
+                      <option key={c} value={c}>
+                        {c}
+                      </option>
+                    ))}
                   </select>
                 </div>
-                <div className="col-4">
+                <div className="col-6">
                   <label className="form-label">Area</label>
-                  <input className="form-control" required value={area} onChange={e=>setArea(e.target.value)} />
+                  <input
+                    className="form-control"
+                    required
+                    value={area}
+                    onChange={(e) => setArea(e.target.value)}
+                  />
                 </div>
                 <div className="col-12">
                   <label className="form-label">Exact Location / Address</label>
-                  <textarea className="form-control" rows="2" required value={address} onChange={e=>setAddress(e.target.value)} />
+                  <textarea
+                    className="form-control"
+                    rows="2"
+                    required
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                  />
                 </div>
                 <div className="col-12">
                   <label className="form-label">Google Map URL</label>
-                  <input type="url" className="form-control" value={mapUrl} onChange={e=>setMapUrl(e.target.value)} />
+                  <input
+                    type="url"
+                    className="form-control"
+                    value={mapUrl}
+                    onChange={(e) => setMapUrl(e.target.value)}
+                  />
                 </div>
               </div>
-              <div className="alert alert-info mt-3 small">Your profile will be verified by Admin before access.</div>
+              <div className="alert alert-info mt-3 small">
+                Your profile will be verified by Admin before access.
+              </div>
               <div className="d-grid mt-3">
-                <button className="btn btn-primary" type="submit">Register</button>
+                <button className="btn btn-primary" type="submit">
+                  Register
+                </button>
               </div>
             </form>
           </div>
@@ -123,7 +201,9 @@ const OwnerAddTurf = () => {
           </Modal.Header>
           <Modal.Body>Your profile will be verified by Admin before access.</Modal.Body>
           <Modal.Footer>
-            <Button variant="primary" onClick={handleModalClose}>OK</Button>
+            <Button variant="primary" onClick={handleModalClose}>
+              OK
+            </Button>
           </Modal.Footer>
         </Modal>
       </main>

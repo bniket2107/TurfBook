@@ -210,7 +210,7 @@ const Hero = ({ turfs, setFilteredTurfs, onSearchScroll, sortBy, setSortBy }) =>
                     ))}
                   </select>
                 </div>
-                <div className="col-6 col-md">
+                {/* <div className="col-6 col-md">
                   <select
                     className="form-select"
                     value={facilityFilter}
@@ -222,7 +222,7 @@ const Hero = ({ turfs, setFilteredTurfs, onSearchScroll, sortBy, setSortBy }) =>
                     <option value="Washroom">Washroom</option>
                     <option value="Floodlights">Floodlights</option>
                   </select>
-                </div>
+                </div> */}
                 <div className="col-6 col-md">
                   <select
                     className="form-select"
