@@ -1,52 +1,61 @@
 import React, { useState, useContext } from "react";
 import Navbar from "../components/Navbar";
 import { AuthContext } from "../contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const Login = () => {
-  const { login } = useContext(AuthContext);
-  const navigate = useNavigate();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [role, setRole] = useState("customer");
+  const { login } = useContext(AuthContext);
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  // Extract redirect URL from query params or fallback to null
+  const params = new URLSearchParams(location.search);
+  const redirectUrl = params.get("redirect");
 
-    if (!email || !password) {
-      alert("Please enter both email and password");
-      return;
-    }
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [role, setRole] = useState("customer");
 
-    // Perform actual auth call here in production...
+  const handleSubmit = (e) => {
+    e.preventDefault();
 
-    // Mimic successful login by updating context state
-    login({
-      token: "sample-token", // replace with real token if available
-      role,
-      email
-    });
+    if (!email || !password) {
+      alert("Please enter both email and password");
+      return;
+    }
 
-    // Redirect based on role
-    if (role === "customer") {
-      navigate("/");
-    } else if (role === "owner") {
-      navigate("/owner-dashboard");
-    }
-  };
+    // Perform actual auth call here in production...
 
-  return (
-    <>
-      <Navbar />
-      <div
-        className="container py-5"
-        style={{ maxWidth: "520px", position: "absolute", top: "1%", left: "35%" }}
-      >
-        <h1 className="h4 mt-5 mb-4 text-center">Login</h1>
-        <div className="card">
-          <div className="card-body">
-            <form onSubmit={handleSubmit} noValidate>
-              <div className="mb-3">
+    // Mimic successful login by updating context state
+    login({
+      token: "sample-token",
+      role,
+      email
+    });
+
+    // Navigate to redirect URL if set, else role-based navigation
+    if (redirectUrl) {
+      navigate(redirectUrl);
+    } else if (role === "customer") {
+      navigate("/");
+    } else if (role === "owner") {
+      navigate("/owner-dashboard");
+    }
+  };
+
+  return (
+    <>
+      <Navbar />
+      <div
+        className="container py-5"
+        style={{ maxWidth: "520px", position: "absolute", top: "1%", left: "35%" }}
+      >
+        <h1 className="h4 mt-5 mb-4 text-center">Login</h1>
+        <div className="card">
+          <div className="card-body">
+            <form onSubmit={handleSubmit} noValidate>
+              {/* form fields here */}
+<div className="mb-3">
                 <label htmlFor="loginEmail" className="form-label">
                   Email
                 </label>
@@ -96,11 +105,11 @@ const Login = () => {
                   Login
                 </button>
               </div>
-            </form>
-          </div>
-        </div>
-
-        <div className="d-grid mt-3">
+            </form>
+          </div>
+        </div>
+        {/* rest of your login page as is */}
+<div className="d-grid mt-3">
           <button
             className="btn btn-link"
             onClick={() => {
@@ -126,9 +135,8 @@ const Login = () => {
             Register as Owner
           </a>
         </p>
-      </div>
-    </>
-  );
+      </div>
+    </>
+  );
 };
-
 export default Login;

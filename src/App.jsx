@@ -16,6 +16,7 @@ import OwnerEditTurf from "./pages/OwnerEditTurf.jsx";
 import CustomerHistory from "./components/CustomerHistory.jsx";
 import AdminOwners from "./pages/AdminOwners.jsx";
 import OwnerPaymentDetails from "./pages/OwnerPaymentDetails.jsx";
+import AdminDashboard from "./pages/AdminDashboard.jsx";
 
 const App = () => {
   return (
@@ -34,8 +35,12 @@ const App = () => {
           <Route path="/owner-add-turf" element={<OwnerAddTurf />} />
           <Route path="/owner-edit-turf" element={<OwnerEditTurf />} />
                     <Route path="/customer-history" element={<CustomerHistory />} />
+                            <Route path="/admin-dashboard" element={<AdminDashboard />} />
+
           <Route path="/admin-owner" element={<AdminOwners />}></Route>
-                    <Route path="/owner-details" element={<OwnerPaymentDetails />}></Route>
+                    <Route path="/owner-details" element={<OwnerPaymentDetails />}>
+          
+                  </Route>
 
 
 

@@ -18,15 +18,40 @@ const Navbar = () => {
   return (
     <nav className="navbar navbar-expand-lg navbar-light bg-white fixed-top border-bottom">
       <div className="container">
-        <a className="navbar-brand" href="/">
-          <img
-            src="/assets/img/logo.PNG"
-            height={32}
-            alt="TurfBook Logo"
-            className="me-2"
-          />
-          Turf<span className="text-primary">Book</span>
-        </a>
+        {(role === "owner" || role === "admin") ? (
+  <div
+    className="navbar-brand"
+    style={{ cursor: "pointer" }}
+    onClick={() => {
+      // Refresh and navigate to Owner Dashboard or Admin Dashboard
+      if (role === "owner") {
+        window.location.href = "/owner-dashboard";
+      } else {
+        window.location.href = "/admin-owner";
+      }
+    }}
+  >
+    <img
+      src="/assets/img/logo.PNG"
+      height={32}
+      alt="TurfBook Logo"
+      className="me-2"
+    />
+    Turf<span className="text-primary">Book</span>
+  </div>
+) : (
+  <a className="navbar-brand" href="/">
+    <img
+      src="/assets/img/logo.PNG"
+      height={32}
+      alt="TurfBook Logo"
+      className="me-2"
+    />
+    Turf<span className="text-primary">Book</span>
+  </a>
+)}
+
+
 
         <button
           className="navbar-toggler"
@@ -43,7 +68,7 @@ const Navbar = () => {
         <div className="collapse navbar-collapse" id="navMain">
           <ul className="navbar-nav me-auto">
             {/* 👇 show these only for logged-in CUSTOMER */}
-            {(!isLoggedIn) && (
+            {(!isLoggedIn || role === "customer") && (
               <>
                 <li className="nav-item">
                   <a href="#features" className="nav-link">
@@ -93,7 +118,7 @@ const Navbar = () => {
                   </a>
                 </li>
                 <li className="nav-item">
-                  <a href="/admin-owners" className="nav-link">
+                  <a href="/admin-owner" className="nav-link">
                     Owners
                   </a>
                 </li>
