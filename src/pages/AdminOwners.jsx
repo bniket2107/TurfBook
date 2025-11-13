@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import Navbar from "../components/Navbar";
+import { Link } from 'react-router-dom';
+
 const ownersData = [
   {
     name: "Ravi Shah",
@@ -72,9 +74,8 @@ const AdminOwners = () => (
                     </button>
                   )}
                   {/* View button */}
-                  <button className="btn btn-outline-primary btn-sm me-2" style={{ minWidth: 55 }}>
-                    View
-                  </button>
+                  <Link to="/owner-details" className="btn btn-primary">View</Link>
+
                   {/* Suspend button */}
                   <button className="btn btn-outline-danger btn-sm" style={{ minWidth: 70 }}>
                     Suspend

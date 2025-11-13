@@ -17,6 +17,7 @@ import CustomerHistory from "./components/CustomerHistory.jsx";
 import AdminOwners from "./pages/AdminOwners.jsx";
 import OwnerPaymentDetails from "./pages/OwnerPaymentDetails.jsx";
 import AdminDashboard from "./pages/AdminDashboard.jsx";
+import OwnerDetails from "./pages/OwnerDetails.jsx";
 
 const App = () => {
   return (
@@ -36,6 +37,7 @@ const App = () => {
           <Route path="/owner-edit-turf" element={<OwnerEditTurf />} />
                     <Route path="/customer-history" element={<CustomerHistory />} />
                             <Route path="/admin-dashboard" element={<AdminDashboard />} />
+      <Route path="/owner-details" element={<OwnerDetails />} />
 
           <Route path="/admin-owner" element={<AdminOwners />}></Route>
                     <Route path="/owner-details" element={<OwnerPaymentDetails />}>
