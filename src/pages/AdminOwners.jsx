@@ -74,7 +74,7 @@ const AdminOwners = () => (
                     </button>
                   )}
                   {/* View button */}
-                  <Link to="/owner-details" className="btn btn-primary">View</Link>
+                  <Link to="/owner-details" className="btn btn-primary" >View</Link>
 
                   {/* Suspend button */}
                   <button className="btn btn-outline-danger btn-sm" style={{ minWidth: 70 }}>

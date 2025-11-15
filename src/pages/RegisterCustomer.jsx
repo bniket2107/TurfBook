@@ -10,17 +10,42 @@ const RegisterCustomer = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (password !== confirmPassword) {
-      alert("Passwords do not match!");
-      return;
-    }
-    // Mimic registration success
-    setUser({ name, email, role: "customer" });
-    alert("Registration Successful!");
-    window.location.href = "/login";
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  if (password !== confirmPassword) {
+    alert("Passwords do not match!");
+    return;
+  }
+
+  const payload = {
+    name,
+    email,
+    phone,
+    password
   };
+
+  try {
+    const response = await fetch("http://192.168.1.8:8088/api/users/register/user", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (response.ok) {
+      alert("Registration Successful!");
+      window.location.href = "/login";
+    } else {
+      const errorData = await response.text();
+      alert("Registration failed: " + errorData);
+    }
+  } catch (error) {
+    alert("Error: " + error.message);
+  }
+};
+
 
   return (
     <>

@@ -14,8 +14,8 @@ const OwnerDetails = () => {
       // Dummy example
       const ownerData = { name: "John Doe", email: "owner@example.com" };
       const turfData = [
-        { id: 1, name: "Turf 1", location: "Mumbai" },
-        { id: 2, name: "Turf 2", location: "Pune" }
+        { id: 1, name: "Turf 1", location: "Mumbai", image: "/assets/img/turff.jpg" },
+        { id: 2, name: "Turf 2", location: "Pune", image: '/assets/img/myTurf.jpg' }
       ];
       const bookingData = [
         {
@@ -44,6 +44,7 @@ const OwnerDetails = () => {
           <div className="card-body">
             {owner ? (
               <>
+              <p></p>
                 <p><strong>Name:</strong> {owner.name}</p>
                 <p><strong>Email:</strong> {owner.email}</p>
               </>
