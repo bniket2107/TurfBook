@@ -19,19 +19,20 @@ const RegisterCustomer = () => {
   }
 
   const payload = {
-    name,
-    email,
-    phone,
-    password
+    fullName: name,
+    email: email,
+    password: password,
+    phoneNumber: phone,
   };
 
   try {
-    const response = await fetch("http://192.168.1.8:8088/api/users/register/user", {
+    // IMPORTANT: use relative /api URL so Vite proxy works
+    const response = await fetch("/api/users/register/user", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
     });
 
     if (response.ok) {
@@ -45,6 +46,8 @@ const RegisterCustomer = () => {
     alert("Error: " + error.message);
   }
 };
+
+
 
 
   return (
