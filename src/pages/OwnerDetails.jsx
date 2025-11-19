@@ -568,6 +568,7 @@ const OwnerDetails = () => {
 
       {/* ⭐ IMAGE MODAL (FULL SCREEN VIEW) */}
       {showImageModal && (
+        
         <div
           className="image-modal"
           style={{
