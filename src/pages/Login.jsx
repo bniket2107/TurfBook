@@ -292,48 +292,546 @@
 // export default Login;
 
 
+// import React, { useState, useContext } from "react";
+// import Navbar from "../components/Navbar";
+// import { AuthContext } from "../contexts/AuthContext";
+// import { useNavigate, useLocation } from "react-router-dom";
+
+// const Login = () => {
+//   const { login } = useContext(AuthContext);
+//   const navigate = useNavigate();
+//   const location = useLocation();
+
+//   const params = new URLSearchParams(location.search);
+//   const redirectUrl = params.get("redirect");
+
+//   const [email, setEmail] = useState("");
+//   const [password, setPassword] = useState("");
+//   const [role, setRole] = useState("customer");
+//   const [loading, setLoading] = useState(false);
+//   const [errorMessage, setErrorMessage] = useState("");  // To handle error messages
+
+//   const handleSubmit = async (e) => {
+//     e.preventDefault();
+//     if (!email || !password) return alert("Please enter both email and password");
+
+//     setLoading(true);
+//     setErrorMessage("");  // Clear previous error message
+
+//     try {
+//       // API endpoint for customer, owner, or admin login
+//       const endpoint =
+//         role === "customer"
+//           ? "http://localhost:8088/api/users/login"
+//           : role === "owner"
+//           ? "http://localhost:8088/api/owners/login"
+//           : "";  // You can add an admin login here
+
+//       const response = await fetch(endpoint, {
+//         method: "POST",
+//         headers: { "Content-Type": "application/json" },
+//         body: JSON.stringify({ email, password }),
+//       });
+
+//       const result = await response.json();
+
+//       if (!response.ok) {
+//         setErrorMessage(result.error || "Invalid login credentials");
+//         setLoading(false);
+//         return;
+//       }
+
+//       // Save login in context
+//       login({
+//         token: result.token,
+//         role: result.role,
+//         email: result.email,
+//       });
+
+//       // Redirect based on role or query param
+//       if (redirectUrl) navigate(redirectUrl);
+//       else if (role === "customer") navigate("/");
+//       else if (role === "owner") navigate("../OwnerDashboard.jsx");
+//     } catch (err) {
+//       console.error(err);
+//       alert("Server error. Please try again later.");
+//     }
+
+//     setLoading(false);
+//   };
+
+//   return (
+//     <>
+//       <Navbar />
+//       <div
+//         className="container py-5"
+//         style={{ maxWidth: "520px", position: "absolute", top: "1%", left: "35%" }}
+//       >
+//         <h1 className="h4 mt-5 mb-4 text-center">Login</h1>
+
+//         <div className="card">
+//           <div className="card-body">
+//             {/* Display error message */}
+//             {errorMessage && (
+//               <div className="alert alert-danger">
+//                 {errorMessage}
+//               </div>
+//             )}
+
+//             <form onSubmit={handleSubmit} noValidate>
+//               <div className="mb-3">
+//                 <label htmlFor="loginEmail" className="form-label">Email</label>
+//                 <input
+//                   id="loginEmail"
+//                   type="email"
+//                   className="form-control"
+//                   required
+//                   value={email}
+//                   onChange={(e) => setEmail(e.target.value)}
+//                   autoComplete="username"
+//                 />
+//               </div>
+
+//               <div className="mb-3">
+//                 <label htmlFor="loginPassword" className="form-label">Password</label>
+//                 <input
+//                   id="loginPassword"
+//                   type="password"
+//                   className="form-control"
+//                   required
+//                   value={password}
+//                   onChange={(e) => setPassword(e.target.value)}
+//                   autoComplete="current-password"
+//                 />
+//               </div>
+
+//               <div className="mb-3">
+//                 <label htmlFor="loginRole" className="form-label">Login as</label>
+//                 <select
+//                   id="loginRole"
+//                   className="form-select"
+//                   value={role}
+//                   onChange={(e) => setRole(e.target.value)}
+//                 >
+//                   <option value="customer">Player</option>
+//                   <option value="owner">Owner</option>
+//                 </select>
+//               </div>
+
+//               <div className="d-grid gap-2">
+//                 <button className="btn btn-primary" type="submit" disabled={loading}>
+//                   {loading ? "Logging in..." : "Login"}
+//                 </button>
+//               </div>
+//             </form>
+//           </div>
+//         </div>
+
+//         <div className="d-grid mt-3">
+//           <button
+//             className="btn btn-link"
+//             onClick={() => {
+//               const emailPrompt = prompt("Enter your email to reset password:");
+//               if (emailPrompt) alert(`If the email exists, reset instructions will be sent to ${emailPrompt}`);
+//             }}
+//           >
+//             Forgot Password?
+//           </button>
+//         </div>
+
+//         <p className="text-center small mt-3">
+//           New here?{" "}
+//           <a href="/register-customer" className="text-primary">Register as Customer</a>{" "}
+//           or{" "}
+//           <a href="/register-owner" className="text-primary">Register as Owner</a>
+//         </p>
+//       </div>
+//     </>
+//   );
+// };
+
+// export default Login;
+
+// import React, { useState, useContext } from "react";
+// import { AuthContext } from "../contexts/AuthContext";
+// import { useNavigate, useLocation } from "react-router-dom";
+// import Navbar from "../components/Navbar";
+
+// const Login = () => {
+//   const { login } = useContext(AuthContext);
+//   const navigate = useNavigate();
+//   const location = useLocation();
+
+//   const params = new URLSearchParams(location.search);
+//   const redirectUrl = params.get("redirect");
+
+//   const [email, setEmail] = useState("");
+//   const [password, setPassword] = useState("");
+//   const [role, setRole] = useState("customer");
+//   const [loading, setLoading] = useState(false);
+//   const [errorMessage, setErrorMessage] = useState("");  // To handle error messages
+
+//   const handleSubmit = async (e) => {
+//     e.preventDefault();
+//     if (!email || !password) return alert("Please enter both email and password");
+
+//     setLoading(true);
+//     setErrorMessage("");  // Clear previous error message
+
+//     try {
+//       // API endpoint for customer, owner, or admin login
+//       const endpoint =
+//         role === "customer"
+//           ? "http://localhost:8088/api/users/login"
+//           : role === "owner"
+//           ? "http://localhost:8088/api/owners/login"
+//           : "";  // You can add an admin login here
+
+//       const response = await fetch(endpoint, {
+//         method: "POST",
+//         headers: { "Content-Type": "application/json" },
+//         body: JSON.stringify({ email, password }),
+//       });
+
+//       const result = await response.json();
+
+//       if (!response.ok) {
+//         setErrorMessage(result.error || "Invalid login credentials");
+//         setLoading(false);
+//         return;
+//       }
+
+//       // Save login in context
+//       login({
+//         token: result.token,
+//         role: result.role,
+//         email: result.email,
+//       });
+
+//       // Redirect based on role or query param
+//       if (redirectUrl) {
+//         navigate(redirectUrl); // Navigate to the redirect URL from query params
+//       } else if (role === "customer") {
+//         navigate("/");  // Navigate to the homepage for customer
+//       } else if (role === "owner") {
+//         navigate("/owner-dashboard");  // Navigate to the owner dashboard
+//       }
+//     } catch (err) {
+//       console.error(err);
+//       alert("Server error. Please try again later.");
+//     }
+
+//     setLoading(false);
+//   };
+
+//   return (
+//     <>
+//       <Navbar />
+//       <div
+//         className="container py-5"
+//         style={{ maxWidth: "520px", position: "absolute", top: "1%", left: "35%" }}
+//       >
+//         <h1 className="h4 mt-5 mb-4 text-center">Login</h1>
+
+//         <div className="card">
+//           <div className="card-body">
+//             {/* Display error message */}
+//             {errorMessage && (
+//               <div className="alert alert-danger">
+//                 {errorMessage}
+//               </div>
+//             )}
+
+//             <form onSubmit={handleSubmit} noValidate>
+//               <div className="mb-3">
+//                 <label htmlFor="loginEmail" className="form-label">Email</label>
+//                 <input
+//                   id="loginEmail"
+//                   type="email"
+//                   className="form-control"
+//                   required
+//                   value={email}
+//                   onChange={(e) => setEmail(e.target.value)}
+//                   autoComplete="username"
+//                 />
+//               </div>
+
+//               <div className="mb-3">
+//                 <label htmlFor="loginPassword" className="form-label">Password</label>
+//                 <input
+//                   id="loginPassword"
+//                   type="password"
+//                   className="form-control"
+//                   required
+//                   value={password}
+//                   onChange={(e) => setPassword(e.target.value)}
+//                   autoComplete="current-password"
+//                 />
+//               </div>
+
+//               <div className="mb-3">
+//                 <label htmlFor="loginRole" className="form-label">Login as</label>
+//                 <select
+//                   id="loginRole"
+//                   className="form-select"
+//                   value={role}
+//                   onChange={(e) => setRole(e.target.value)}
+//                 >
+//                   <option value="customer">Player</option>
+//                   <option value="owner">Owner</option>
+//                 </select>
+//               </div>
+
+//               <div className="d-grid gap-2">
+//                 <button className="btn btn-primary" type="submit" disabled={loading}>
+//                   {loading ? "Logging in..." : "Login"}
+//                 </button>
+//               </div>
+//             </form>
+//           </div>
+//         </div>
+
+//         <div className="d-grid mt-3">
+//           <button
+//             className="btn btn-link"
+//             onClick={() => {
+//               const emailPrompt = prompt("Enter your email to reset password:");
+//               if (emailPrompt) alert(`If the email exists, reset instructions will be sent to ${emailPrompt}`);
+//             }}
+//           >
+//             Forgot Password?
+//           </button>
+//         </div>
+
+//         <p className="text-center small mt-3">
+//           New here?{" "}
+//           <a href="/register-customer" className="text-primary">Register as Customer</a>{" "}
+//           or{" "}
+//           <a href="/register-owner" className="text-primary">Register as Owner</a>
+//         </p>
+//       </div>
+//     </>
+//   );
+// };
+
+// export default Login;
+
+
+// import React, { useState, useContext } from "react";
+// import { AuthContext } from "../contexts/AuthContext"; // Assuming you have an AuthContext to manage login state
+// import { useNavigate, useLocation } from "react-router-dom";
+// import Navbar from "../components/Navbar"; // Assuming you have a Navbar component
+
+// const Login = () => {
+//   const { login } = useContext(AuthContext); // Context for managing login state
+//   const navigate = useNavigate();
+//   const location = useLocation();
+
+//   // Get the redirect URL from query parameters, if any
+//   const params = new URLSearchParams(location.search);
+//   const redirectUrl = params.get("redirect");
+
+//   const [email, setEmail] = useState(""); // Email state
+//   const [password, setPassword] = useState(""); // Password state
+//   const [role, setRole] = useState("customer"); // Role state, defaulting to "customer"
+//   const [loading, setLoading] = useState(false); // Loading state while logging in
+//   const [errorMessage, setErrorMessage] = useState("");  // Error message state
+
+//   const handleSubmit = async (e) => {
+//     e.preventDefault();
+//     if (!email || !password) {
+//       return alert("Please enter both email and password");
+//     }
+
+//     setLoading(true);
+//     setErrorMessage("");  // Clear previous error message
+
+//     try {
+//       // Determine the correct API endpoint based on the selected role
+//       const endpoint =
+//         role === "customer"
+//           ? "http://localhost:8088/api/users/login" // API endpoint for customer login
+//           : role === "owner"
+//           ? "http://localhost:8088/api/owners/login" // API endpoint for owner login
+//           : "";  // Add admin or other roles here if needed
+
+//       // Make the API call to log in
+//       const response = await fetch(endpoint, {
+//         method: "POST",
+//         headers: { "Content-Type": "application/json" },
+//         body: JSON.stringify({ email, password }),
+//       });
+
+//       const result = await response.json(); // Parse the response
+
+//       if (!response.ok) {
+//         setErrorMessage(result.error || "Invalid login credentials");
+//         setLoading(false);
+//         return;
+//       }
+
+//       // Save the login information in context
+//       login({
+//         token: result.token,
+//         role: result.role,
+//         email: result.email,
+//       });
+
+//       // Redirect based on role or query param
+//       if (redirectUrl) {
+//         navigate(redirectUrl); // Navigate to the redirect URL from query params
+//       } else if (role === "customer") {
+//         navigate("/");  // Navigate to the homepage for customer
+//       } else if (role === "owner") {
+//         navigate("/owner-dashboard");  // Navigate to the owner dashboard
+//       }
+//     } catch (err) {
+//       console.error(err);
+//       alert("Server error. Please try again later.");
+//     }
+
+//     setLoading(false);
+//   };
+
+//   return (
+//     <>
+//       <Navbar />
+//       <div
+//         className="container py-5"
+//         style={{ maxWidth: "520px", position: "absolute", top: "1%", left: "35%" }}
+//       >
+//         <h1 className="h4 mt-5 mb-4 text-center">Login</h1>
+
+//         <div className="card">
+//           <div className="card-body">
+//             {/* Display error message */}
+//             {errorMessage && (
+//               <div className="alert alert-danger">
+//                 {errorMessage}
+//               </div>
+//             )}
+
+//             <form onSubmit={handleSubmit} noValidate>
+//               <div className="mb-3">
+//                 <label htmlFor="loginEmail" className="form-label">Email</label>
+//                 <input
+//                   id="loginEmail"
+//                   type="email"
+//                   className="form-control"
+//                   required
+//                   value={email}
+//                   onChange={(e) => setEmail(e.target.value)}
+//                   autoComplete="username"
+//                 />
+//               </div>
+
+//               <div className="mb-3">
+//                 <label htmlFor="loginPassword" className="form-label">Password</label>
+//                 <input
+//                   id="loginPassword"
+//                   type="password"
+//                   className="form-control"
+//                   required
+//                   value={password}
+//                   onChange={(e) => setPassword(e.target.value)}
+//                   autoComplete="current-password"
+//                 />
+//               </div>
+
+//               <div className="mb-3">
+//                 <label htmlFor="loginRole" className="form-label">Login as</label>
+//                 <select
+//                   id="loginRole"
+//                   className="form-select"
+//                   value={role}
+//                   onChange={(e) => setRole(e.target.value)}
+//                 >
+//                   <option value="customer">Player</option>
+//                   <option value="owner">Owner</option>
+//                 </select>
+//               </div>
+
+//               <div className="d-grid gap-2">
+//                 <button className="btn btn-primary" type="submit" disabled={loading}>
+//                   {loading ? "Logging in..." : "Login"}
+//                 </button>
+//               </div>
+//             </form>
+//           </div>
+//         </div>
+
+//         <div className="d-grid mt-3">
+//           <button
+//             className="btn btn-link"
+//             onClick={() => {
+//               const emailPrompt = prompt("Enter your email to reset password:");
+//               if (emailPrompt) alert(`If the email exists, reset instructions will be sent to ${emailPrompt}`);
+//             }}
+//           >
+//             Forgot Password?
+//           </button>
+//         </div>
+
+//         <p className="text-center small mt-3">
+//           New here?{" "}
+//           <a href="/register-customer" className="text-primary">Register as Customer</a>{" "}
+//           or{" "}
+//           <a href="/register-owner" className="text-primary">Register as Owner</a>
+//         </p>
+//       </div>
+//     </>
+//   );
+// };
+
+// export default Login;
+
+
 import React, { useState, useContext } from "react";
-import Navbar from "../components/Navbar";
-import { AuthContext } from "../contexts/AuthContext";
+import { AuthContext } from "../contexts/AuthContext"; // Assuming you have an AuthContext to manage login state
 import { useNavigate, useLocation } from "react-router-dom";
+import Navbar from "../components/Navbar"; // Assuming you have a Navbar component
 
 const Login = () => {
-  const { login } = useContext(AuthContext);
+  const { login } = useContext(AuthContext); // Context for managing login state
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Get the redirect URL from query parameters, if any
   const params = new URLSearchParams(location.search);
   const redirectUrl = params.get("redirect");
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [role, setRole] = useState("customer");
-  const [loading, setLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");  // To handle error messages
+  const [email, setEmail] = useState(""); // Email state
+  const [password, setPassword] = useState(""); // Password state
+  const [role, setRole] = useState("player"); // Role state, defaulting to "player"
+  const [loading, setLoading] = useState(false); // Loading state while logging in
+  const [errorMessage, setErrorMessage] = useState("");  // Error message state
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!email || !password) return alert("Please enter both email and password");
+    if (!email || !password) {
+      return alert("Please enter both email and password");
+    }
 
     setLoading(true);
     setErrorMessage("");  // Clear previous error message
 
     try {
-      // API endpoint for customer, owner, or admin login
+      // Determine the correct API endpoint based on the selected role
       const endpoint =
-        role === "customer"
-          ? "http://localhost:8088/api/users/login"
+        role === "player"
+          ? "http://localhost:8088/api/users/login" // API endpoint for player login
           : role === "owner"
-          ? "http://localhost:8088/api/owners/login"
-          : "";  // You can add an admin login here
+          ? "http://localhost:8088/api/owners/login" // API endpoint for owner login
+          : "";  // Add admin or other roles here if needed
 
+      // Make the API call to log in
       const response = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
 
-      const result = await response.json();
+      const result = await response.json(); // Parse the response
 
       if (!response.ok) {
         setErrorMessage(result.error || "Invalid login credentials");
@@ -341,7 +839,7 @@ const Login = () => {
         return;
       }
 
-      // Save login in context
+      // Save the login information in context
       login({
         token: result.token,
         role: result.role,
@@ -349,9 +847,13 @@ const Login = () => {
       });
 
       // Redirect based on role or query param
-      if (redirectUrl) navigate(redirectUrl);
-      else if (role === "customer") navigate("/");
-      else if (role === "owner") navigate("/owner-dashboard");
+      if (redirectUrl) {
+        navigate(redirectUrl); // Navigate to the redirect URL from query params
+      } else if (role === "player") {
+        navigate("/");  // Navigate to the homepage for player
+      } else if (role === "owner") {
+        navigate("/owner-dashboard");  // Navigate to the owner dashboard
+      }
     } catch (err) {
       console.error(err);
       alert("Server error. Please try again later.");
@@ -413,7 +915,7 @@ const Login = () => {
                   value={role}
                   onChange={(e) => setRole(e.target.value)}
                 >
-                  <option value="customer">Player</option>
+                  <option value="player">Player</option>  {/* Updated from "customer" to "player" */}
                   <option value="owner">Owner</option>
                 </select>
               </div>
@@ -441,7 +943,7 @@ const Login = () => {
 
         <p className="text-center small mt-3">
           New here?{" "}
-          <a href="/register-customer" className="text-primary">Register as Customer</a>{" "}
+          <a href="/register-player" className="text-primary">Register as Player</a>{" "} {/* Updated from "Register as Customer" */}
           or{" "}
           <a href="/register-owner" className="text-primary">Register as Owner</a>
         </p>
