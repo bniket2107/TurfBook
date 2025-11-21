@@ -232,7 +232,246 @@
 
 // export default TurfDetails;
 
+///-----------------------------------------
 
+// import React, { useEffect, useState, useContext } from "react";
+// import { useNavigate, useLocation } from "react-router-dom";
+// import axios from "axios";
+// import { AuthContext } from "../contexts/AuthContext";
+// import Navbar from "./Navbar";
+
+// const TurfDetails = () => {
+//   const { user } = useContext(AuthContext);
+//   const navigate = useNavigate();
+//   const location = useLocation();
+
+//   const params = new URLSearchParams(location.search);
+//   const turfId = params.get("tid");
+
+//   const [turf, setTurf] = useState(null);
+//   const [loading, setLoading] = useState(true);
+//   const [error, setError] = useState(null);
+
+//   // -------------------------
+//   // Fetch Turf Details
+//   // -------------------------
+//   useEffect(() => {
+//     if (!turfId) return;
+
+//     const fetchTurfDetails = async () => {
+//       try {
+//         const res = await axios.get(`http://localhost:8088/api/turfs/${turfId}`);
+//         const t = res.data;
+
+//         setTurf({
+//           id: t.turfId,
+//           name: t.turfName,
+//           location: t.location || `${t.area}, ${t.city}`,
+//           price: t.pricePerHour,
+//           discountedPrice: t.discountedPrice,
+//           rating: t.rating || 4.5,
+//           facilities: t.facilities || [],
+//           images: t.imageUrls && t.imageUrls.length > 0 ? t.imageUrls : ["/assets/img/default-turf.jpg"],
+//           reviews: t.reviews || [],
+//           mapUrl: t.mapUrl || `https://www.google.com/maps?q=${t.area}+${t.city}`,
+//           description: t.description || "A well-maintained turf with great ambience.",
+//         });
+
+//         setLoading(false);
+//       } catch (err) {
+//         console.error("Error fetching turf details:", err);
+//         setError("Unable to load turf details. Please try again later.");
+//         setLoading(false);
+//       }
+//     };
+
+//     fetchTurfDetails();
+//   }, [turfId]);
+
+
+//   // -------------------------
+//   // Handle Booking Button
+//   // -------------------------
+//   const handleBookSlot = () => {
+//     if (!user?.token) {
+//       navigate(`/login?redirect=/book-slot?tid=${turf.id}`);
+//     } else {
+//       navigate(`/book-slot?tid=${turf.id}`);
+//     }
+//   };
+
+//   // -------------------------
+//   // Loading State
+//   // -------------------------
+//   if (loading) {
+//     return (
+//       <main className="container py-5 text-center">
+//         <div className="spinner-border text-primary"></div>
+//         <p className="mt-3">Loading turf details...</p>
+//       </main>
+//     );
+//   }
+
+//   // -------------------------
+//   // Error State
+//   // -------------------------
+//   if (error) {
+//     return (
+//       <main className="container py-5">
+//         <div className="alert alert-danger text-center">{error}</div>
+//       </main>
+//     );
+//   }
+
+//   if (!turf) {
+//     return (
+//       <main className="container py-5">
+//         <div className="alert alert-warning text-center">Turf not found!</div>
+//       </main>
+//     );
+//   }
+
+//   // ---------------------------------------------------
+//   // UI SECTION
+//   // ---------------------------------------------------
+//   return (
+//    <div> <Navbar />
+//     <main className="container py-4">
+
+//       {/* Breadcrumb */}
+//       <nav aria-label="breadcrumb">
+//         <ol className="breadcrumb">
+//           <li className="breadcrumb-item">
+//             <a href="/" className="text-decoration-none">Browse</a>
+//           </li>
+//           <li className="breadcrumb-item active">Turf Details</li>
+//         </ol>
+//       </nav>
+
+//       <div className="row g-4">
+
+//         {/* LEFT COLUMN */}
+//         <div className="col-lg-7">
+
+//           {/* Image Carousel */}
+//           <div id="turfCarousel" className="carousel slide mb-3">
+//             <div className="carousel-inner">
+//               {turf.images.map((img, idx) => (
+//                 <div key={idx} className={`carousel-item ${idx === 0 ? "active" : ""}`}>
+//                   <img
+//                     src={img}
+//                     className="d-block w-100 rounded"
+//                     style={{ height: "370px", objectFit: "cover" }}
+//                     alt={`Image ${idx + 1}`}
+//                   />
+//                 </div>
+//               ))}
+//             </div>
+
+//             {turf.images.length > 1 && (
+//               <>
+//                 <button className="carousel-control-prev" type="button" data-bs-target="#turfCarousel" data-bs-slide="prev">
+//                   <span className="carousel-control-prev-icon"></span>
+//                 </button>
+//                 <button className="carousel-control-next" type="button" data-bs-target="#turfCarousel" data-bs-slide="next">
+//                   <span className="carousel-control-next-icon"></span>
+//                 </button>
+//               </>
+//             )}
+//           </div>
+
+//           {/* Basic Info */}
+//           <h2>{turf.name}</h2>
+//           <p className="text-muted">{turf.location}</p>
+
+//           <div className="mb-3">
+//             <span className="badge bg-success me-2">{turf.rating} ★</span>
+
+//             {turf.discountedPrice < turf.price ? (
+//               <>
+//                 <span className="badge bg-secondary me-2">
+//                   ₹{turf.discountedPrice}/hour
+//                 </span>
+                
+//                 <span className="text-muted text-decoration-line-through small">
+//                   ₹{turf.price}/hour
+//                 </span>
+//               </>
+//             ) : (
+//               <span className="badge bg-secondary">₹{turf.price}/hour</span>
+//             )}
+//           </div>
+
+//           {/* Facilities */}
+//           <h4 className="h5">Facilities</h4>
+//           <div className="d-flex flex-wrap gap-2 mb-4">
+//             {turf.facilities.length > 0 ? (
+//               turf.facilities.map((f, i) => (
+//                 <span key={i} className="badge text-bg-light border px-3 py-2">
+//                   {f}
+//                 </span>
+//               ))
+//             ) : (
+//               <p className="text-muted small">No facilities listed.</p>
+//             )}
+//           </div>
+
+//           {/* Description */}
+//           <h4 className="h5">Description</h4>
+//           <p>{turf.description}</p>
+
+//           {/* Reviews */}
+//           <h4 className="h5">Reviews</h4>
+//           {turf.reviews.length > 0 ? (
+//             <div className="vstack gap-3">
+//               {turf.reviews.map((rev, i) => (
+//                 <div className="card p-2 shadow-sm" key={i}>{rev}</div>
+//               ))}
+//             </div>
+//           ) : (
+//             <p className="text-muted small">No reviews yet.</p>
+//           )}
+//         </div>
+
+//         {/* RIGHT COLUMN */}
+//         <div className="col-lg-5">
+//           <div className="card shadow-sm">
+//             <div className="card-body">
+//               <h5 className="text-muted mb-3">Book a Slot</h5>
+
+//               <div className="d-grid gap-2">
+//                 <button className="btn btn-primary" onClick={handleBookSlot}>
+//                   Select Date & Time
+//                 </button>
+
+//                 <a
+//                   className="btn btn-outline-secondary"
+//                   href={turf.mapUrl}
+//                   target="_blank"
+//                   rel="noreferrer"
+//                 >
+//                   View on Map
+//                 </a>
+//               </div>
+//             </div>
+//           </div>
+
+//           <div className="alert alert-info mt-3 small">
+//             You can cancel or reschedule before the slot start as per policy.
+//           </div>
+//         </div>
+
+//       </div>
+//     </main>
+//    </div>
+//   );
+// };
+
+
+// export default TurfDetails;
+
+
+//----------------------------------------------
 import React, { useEffect, useState, useContext } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
@@ -262,18 +501,29 @@ const TurfDetails = () => {
         const res = await axios.get(`http://localhost:8088/api/turfs/${turfId}`);
         const t = res.data;
 
+        // discount fix applied here ONLY
+        const discountPercent = t.discount ?? 0;
+        const discountedPrice = Math.round(
+          t.pricePerHour - (t.pricePerHour * discountPercent) / 100
+        );
+
         setTurf({
           id: t.turfId,
           name: t.turfName,
           location: t.location || `${t.area}, ${t.city}`,
           price: t.pricePerHour,
-          discountedPrice: t.discountedPrice,
+          discountPercent: discountPercent,
+          discountedPrice: discountedPrice,
           rating: t.rating || 4.5,
           facilities: t.facilities || [],
-          images: t.imageUrls && t.imageUrls.length > 0 ? t.imageUrls : ["/assets/img/default-turf.jpg"],
+          images:
+            t.imageUrls && t.imageUrls.length > 0
+              ? t.imageUrls
+              : ["/assets/img/default-turf.jpg"],
           reviews: t.reviews || [],
           mapUrl: t.mapUrl || `https://www.google.com/maps?q=${t.area}+${t.city}`,
-          description: t.description || "A well-maintained turf with great ambience.",
+          description:
+            t.description || "A well-maintained turf with great ambience.",
         });
 
         setLoading(false);
@@ -286,7 +536,6 @@ const TurfDetails = () => {
 
     fetchTurfDetails();
   }, [turfId]);
-
 
   // -------------------------
   // Handle Booking Button
@@ -334,137 +583,153 @@ const TurfDetails = () => {
   // UI SECTION
   // ---------------------------------------------------
   return (
-   <div> <Navbar />
-    <main className="container py-4">
+    <div>
+      <Navbar />
+      <main className="container py-4">
+        {/* Breadcrumb */}
+        <nav aria-label="breadcrumb">
+          <ol className="breadcrumb">
+            <li className="breadcrumb-item">
+              <a href="/" className="text-decoration-none">Browse</a>
+            </li>
+            <li className="breadcrumb-item active">Turf Details</li>
+          </ol>
+        </nav>
 
-      {/* Breadcrumb */}
-      <nav aria-label="breadcrumb">
-        <ol className="breadcrumb">
-          <li className="breadcrumb-item">
-            <a href="/" className="text-decoration-none">Browse</a>
-          </li>
-          <li className="breadcrumb-item active">Turf Details</li>
-        </ol>
-      </nav>
+        <div className="row g-4">
+          {/* LEFT COLUMN */}
+          <div className="col-lg-7">
+            {/* Image Carousel */}
+            <div id="turfCarousel" className="carousel slide mb-3">
+              <div className="carousel-inner">
+                {turf.images.map((img, idx) => (
+                  <div
+                    key={idx}
+                    className={`carousel-item ${idx === 0 ? "active" : ""}`}
+                  >
+                    <img
+                      src={img}
+                      className="d-block w-100 rounded"
+                      style={{ height: "370px", objectFit: "cover" }}
+                      alt={`Image ${idx + 1}`}
+                    />
+                  </div>
+                ))}
+              </div>
 
-      <div className="row g-4">
+              {turf.images.length > 1 && (
+                <>
+                  <button
+                    className="carousel-control-prev"
+                    type="button"
+                    data-bs-target="#turfCarousel"
+                    data-bs-slide="prev"
+                  >
+                    <span className="carousel-control-prev-icon"></span>
+                  </button>
+                  <button
+                    className="carousel-control-next"
+                    type="button"
+                    data-bs-target="#turfCarousel"
+                    data-bs-slide="next"
+                  >
+                    <span className="carousel-control-next-icon"></span>
+                  </button>
+                </>
+              )}
+            </div>
 
-        {/* LEFT COLUMN */}
-        <div className="col-lg-7">
+            {/* Basic Info */}
+            <h2>{turf.name}</h2>
+            <p className="text-muted">{turf.location}</p>
 
-          {/* Image Carousel */}
-          <div id="turfCarousel" className="carousel slide mb-3">
-            <div className="carousel-inner">
-              {turf.images.map((img, idx) => (
-                <div key={idx} className={`carousel-item ${idx === 0 ? "active" : ""}`}>
-                  <img
-                    src={img}
-                    className="d-block w-100 rounded"
-                    style={{ height: "370px", objectFit: "cover" }}
-                    alt={`Image ${idx + 1}`}
-                  />
+            <div className="mb-3">
+              <span className="badge bg-success me-2">{turf.rating} ★</span>
+
+              {/* PRICE + DISCOUNT FIXED HERE ONLY */}
+              {turf.discountPercent > 0 ? (
+                <>
+                  <span className="badge bg-danger me-2">
+                    {turf.discountPercent}% OFF
+                  </span>
+
+                  <span className="badge bg-secondary me-2">
+                    ₹{turf.discountedPrice}/hour
+                  </span>
+
+                  <span className="text-muted text-decoration-line-through small">
+                    ₹{turf.price}/hour
+                  </span>
+                </>
+              ) : (
+                <span className="badge bg-secondary">₹{turf.price}/hour</span>
+              )}
+            </div>
+
+            {/* Facilities */}
+            <h4 className="h5">Facilities</h4>
+            <div className="d-flex flex-wrap gap-2 mb-4">
+              {turf.facilities.length > 0 ? (
+                turf.facilities.map((f, i) => (
+                  <span key={i} className="badge text-bg-light border px-3 py-2">
+                    {f}
+                  </span>
+                ))
+              ) : (
+                <p className="text-muted small">No facilities listed.</p>
+              )}
+            </div>
+
+            {/* Description */}
+            <h4 className="h5">Description</h4>
+            <p>{turf.description}</p>
+
+            {/* Reviews */}
+            <h4 className="h5">Reviews</h4>
+            {turf.reviews.length > 0 ? (
+              <div className="vstack gap-3">
+                {turf.reviews.map((rev, i) => (
+                  <div className="card p-2 shadow-sm" key={i}>
+                    {rev}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-muted small">No reviews yet.</p>
+            )}
+          </div>
+
+          {/* RIGHT COLUMN */}
+          <div className="col-lg-5">
+            <div className="card shadow-sm">
+              <div className="card-body">
+                <h5 className="text-muted mb-3">Book a Slot</h5>
+
+                <div className="d-grid gap-2">
+                  <button className="btn btn-primary" onClick={handleBookSlot}>
+                    Select Date & Time
+                  </button>
+
+                  <a
+                    className="btn btn-outline-secondary"
+                    href={turf.mapUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    View on Map
+                  </a>
                 </div>
-              ))}
-            </div>
-
-            {turf.images.length > 1 && (
-              <>
-                <button className="carousel-control-prev" type="button" data-bs-target="#turfCarousel" data-bs-slide="prev">
-                  <span className="carousel-control-prev-icon"></span>
-                </button>
-                <button className="carousel-control-next" type="button" data-bs-target="#turfCarousel" data-bs-slide="next">
-                  <span className="carousel-control-next-icon"></span>
-                </button>
-              </>
-            )}
-          </div>
-
-          {/* Basic Info */}
-          <h2>{turf.name}</h2>
-          <p className="text-muted">{turf.location}</p>
-
-          <div className="mb-3">
-            <span className="badge bg-success me-2">{turf.rating} ★</span>
-
-            {turf.discountedPrice < turf.price ? (
-              <>
-                <span className="badge bg-secondary me-2">
-                  ₹{turf.discountedPrice}/hour
-                </span>
-                
-                <span className="text-muted text-decoration-line-through small">
-                  ₹{turf.price}/hour
-                </span>
-              </>
-            ) : (
-              <span className="badge bg-secondary">₹{turf.price}/hour</span>
-            )}
-          </div>
-
-          {/* Facilities */}
-          <h4 className="h5">Facilities</h4>
-          <div className="d-flex flex-wrap gap-2 mb-4">
-            {turf.facilities.length > 0 ? (
-              turf.facilities.map((f, i) => (
-                <span key={i} className="badge text-bg-light border px-3 py-2">
-                  {f}
-                </span>
-              ))
-            ) : (
-              <p className="text-muted small">No facilities listed.</p>
-            )}
-          </div>
-
-          {/* Description */}
-          <h4 className="h5">Description</h4>
-          <p>{turf.description}</p>
-
-          {/* Reviews */}
-          <h4 className="h5">Reviews</h4>
-          {turf.reviews.length > 0 ? (
-            <div className="vstack gap-3">
-              {turf.reviews.map((rev, i) => (
-                <div className="card p-2 shadow-sm" key={i}>{rev}</div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-muted small">No reviews yet.</p>
-          )}
-        </div>
-
-        {/* RIGHT COLUMN */}
-        <div className="col-lg-5">
-          <div className="card shadow-sm">
-            <div className="card-body">
-              <h5 className="text-muted mb-3">Book a Slot</h5>
-
-              <div className="d-grid gap-2">
-                <button className="btn btn-primary" onClick={handleBookSlot}>
-                  Select Date & Time
-                </button>
-
-                <a
-                  className="btn btn-outline-secondary"
-                  href={turf.mapUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  View on Map
-                </a>
               </div>
             </div>
-          </div>
 
-          <div className="alert alert-info mt-3 small">
-            You can cancel or reschedule before the slot start as per policy.
+            <div className="alert alert-info mt-3 small">
+              You can cancel or reschedule before the slot start as per policy.
+            </div>
           </div>
         </div>
-
-      </div>
-    </main>
-   </div>
+      </main>
+    </div>
   );
 };
-
 
 export default TurfDetails;

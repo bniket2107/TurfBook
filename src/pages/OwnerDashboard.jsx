@@ -584,3 +584,152 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
+
+
+// ------
+
+
+
+// import React, { useEffect, useState, useContext } from "react";
+// import { useNavigate } from "react-router-dom";
+// import Navbar from "../components/Navbar";
+// import { AuthContext } from "../contexts/AuthContext";
+
+// const OwnerDashboard = () => {
+//   const { user } = useContext(AuthContext); // token, role, email
+//   const navigate = useNavigate();
+
+//   const [owner, setOwner] = useState(null);
+//   const [turfs, setTurfs] = useState([]);
+//   const [stats, setStats] = useState({ revenue: 0, bookings: 0 });
+
+//   useEffect(() => {
+//     if (!user || user.role !== "OWNER") {
+//       navigate("/login");
+//       return;
+//     }
+
+//     const token = user.token;
+
+//     // Fetch owner details + turfs + slots + images
+//     const fetchOwnerDetails = async () => {
+//       try {
+//         // 1️⃣ Owner info
+//         const ownerRes = await fetch("/api/owners/me", {
+//           headers: { Authorization: `Bearer ${token}` },
+//         });
+//         if (!ownerRes.ok) throw new Error("Failed to fetch owner info");
+//         const ownerData = await ownerRes.json();
+//         setOwner(ownerData);
+
+//         // 2️⃣ Turfs for owner
+//         const turfRes = await fetch("/api/turfs/owner-turfs", {
+//           headers: { Authorization: `Bearer ${token}` },
+//         });
+//         if (!turfRes.ok) throw new Error("Failed to fetch turfs");
+//         const turfData = await turfRes.json();
+
+//         // For each turf, fetch slots and images
+//         const turfsWithDetails = await Promise.all(
+//           turfData.map(async (turf) => {
+//             // Fetch slots
+//             const slotsRes = await fetch(`/api/slots/turf/${turf.turfId}`, {
+//               headers: { Authorization: `Bearer ${token}` },
+//             });
+//             const slots = slotsRes.ok ? await slotsRes.json() : [];
+
+//             // Fetch images
+//             const imagesRes = await fetch(`/api/turf-images/turf/${turf.turfId}`, {
+//               headers: { Authorization: `Bearer ${token}` },
+//             });
+//             const images = imagesRes.ok ? await imagesRes.json() : [];
+
+//             return { ...turf, slots, images };
+//           })
+//         );
+
+//         setTurfs(turfsWithDetails);
+
+//         // 3️⃣ Owner stats
+//         const statsRes = await fetch("/api/bookings/owner-stats", {
+//           headers: { Authorization: `Bearer ${token}` },
+//         });
+//         if (!statsRes.ok) throw new Error("Failed to fetch stats");
+//         const statsData = await statsRes.json();
+//         setStats({ revenue: statsData.totalRevenue, bookings: statsData.totalBookings });
+//       } catch (err) {
+//         console.error(err);
+//       }
+//     };
+
+//     fetchOwnerDetails();
+//   }, [user, navigate]);
+
+//   if (!owner) return <p className="text-center mt-5">Loading owner info...</p>;
+
+//   return (
+//     <>
+//       <Navbar />
+//       <main className="container py-4">
+//         <h1 className="h4 mb-3">Owner Dashboard</h1>
+
+//         {/* Owner Info */}
+//         <div className="alert alert-info">
+//           <strong>Welcome, {owner.ownerName}</strong>
+//           <br />
+//           Email: {owner.email}
+//           <br />
+//           Phone: {owner.contactNo || "N/A"}
+//         </div>
+
+//         {/* Stats */}
+//         <div className="row g-3 mb-4">
+//           <div className="col-6 col-lg-4">
+//             <div className="card">
+//               <div className="card-body">
+//                 <div className="text-muted small">Revenue</div>
+//                 <div className="fs-5">₹{stats.revenue}</div>
+//               </div>
+//             </div>
+//           </div>
+//           <div className="col-6 col-lg-4">
+//             <div className="card">
+//               <div className="card-body">
+//                 <div className="text-muted small">Bookings</div>
+//                 <div className="fs-5">{stats.bookings}</div>
+//               </div>
+//             </div>
+//           </div>
+//           <div className="col-6 col-lg-4">
+//             <div className="card">
+//               <div className="card-body">
+//                 <div className="text-muted small">Active Turfs</div>
+//                 <div className="fs-5">{turfs.length}</div>
+//               </div>
+//             </div>
+//           </div>
+//         </div>
+
+//         {/* Turfs List */}
+//         <h2 className="h5 mb-3">Your Turfs</h2>
+//         {turfs.length === 0 ? (
+//           <p>No turfs added yet.</p>
+//         ) : (
+//           <ul className="list-group">
+//             {turfs.map((turf) => (
+//               <li key={turf.turfId} className="list-group-item">
+//                 <strong>{turf.turfName}</strong> — {turf.locationUrl} — ₹{turf.pricePerHour}/hr
+//                 <br />
+//                 <small>
+//                   Slots: {turf.slots.length} | Images: {turf.images.length}
+//                 </small>
+//               </li>
+//             ))}
+//           </ul>
+//         )}
+//       </main>
+//     </>
+//   );
+// };
+
+// export default OwnerDashboard;

@@ -1900,6 +1900,372 @@
 // };
 
 // export default SlotBooking;
+
+
+///--------------------------
+
+
+// import React, { useState, useEffect, useMemo } from "react";
+// import { useNavigate, useLocation } from "react-router-dom";
+// import axios from "axios";
+// import Navbar from "../components/Navbar";
+// import { getToken } from "../utils/Auth";
+
+// // Get today's date in yyyy-mm-dd
+// const getTodayLocal = () => {
+//   const d = new Date();
+//   const yyyy = d.getFullYear();
+//   const mm = String(d.getMonth() + 1).padStart(2, "0");
+//   const dd = String(d.getDate()).padStart(2, "0");
+//   return `${yyyy}-${mm}-${dd}`;
+// };
+
+// // Get max selectable date = today + 29 days
+// const getMaxBookingDate = () => {
+//   const d = new Date();
+//   d.setDate(d.getDate() + 29); // today + 29
+//   const yyyy = d.getFullYear();
+//   const mm = String(d.getMonth() + 1).padStart(2, "0");
+//   const dd = String(d.getDate()).padStart(2, "0");
+//   return `${yyyy}-${mm}-${dd}`;
+// };
+
+// const SlotBooking = () => {
+//   const navigate = useNavigate();
+//   const location = useLocation();
+//   const search = useMemo(() => new URLSearchParams(location.search), [location.search]);
+//   const tid = search.get("tid");
+
+//   const [turf, setTurf] = useState(null);
+//   const [slotDate, setSlotDate] = useState(getTodayLocal());
+//   const [slots, setSlots] = useState([]);
+//   const [selectedTime, setSelectedTime] = useState([]);
+//   const [mode, setMode] = useState("regular");
+//   const [loadingTurf, setLoadingTurf] = useState(true);
+//   const [loadingSlots, setLoadingSlots] = useState(true);
+//   const [totalAmount, setTotalAmount] = useState(0);
+
+//   // ---------------- AUTH CHECK ----------------
+//   useEffect(() => {
+//     if (!getToken()) {
+//       localStorage.setItem("redirectAfterLogin", window.location.href);
+//       navigate("/login");
+//     }
+//   }, [navigate]);
+
+//   // ---------------- FETCH TURF DETAILS ----------------
+//   useEffect(() => {
+//     if (!tid) return;
+
+//     const fetchTurf = async () => {
+//       try {
+//         const res = await axios.get(`http://localhost:8088/api/turfs/${tid}`, {
+//           headers: { Authorization: `Bearer ${getToken()}` },
+//         });
+
+//         // FRONTEND calculates regular finalPrice
+//         const pricePerHour = res.data.pricePerHour || 0;
+//         const discountPercent = res.data.discountPercent || 0;
+//         const finalPrice = Math.round(pricePerHour - (pricePerHour * discountPercent) / 100);
+
+//         setTurf({
+//           id: res.data.turfId,
+//           name: res.data.turfName,
+//           price: pricePerHour,
+//           discountPercent,
+//           finalPrice,
+//           tournamentPrice: res.data.tournamentSlotPrice,
+//           minHour: res.data.minHour || 6,
+//           maxHour: res.data.maxHour || 22,
+//         });
+//       } catch (err) {
+//         console.error("Error fetching turf details:", err);
+//       } finally {
+//         setLoadingTurf(false);
+//       }
+//     };
+
+//     fetchTurf();
+//   }, [tid]);
+
+//   // ---------------- FETCH SLOTS ----------------
+//   useEffect(() => {
+//     if (!tid || !slotDate) return;
+
+//     const fetchSlots = async () => {
+//       setLoadingSlots(true);
+//       try {
+//         const res = await axios.get(`http://localhost:8088/api/slots/${tid}/${slotDate}`, {
+//           headers: { Authorization: `Bearer ${getToken()}` },
+//         });
+//         setSlots(res.data);
+//         setSelectedTime([]);
+//       } catch (err) {
+//         console.error("Error fetching slots:", err);
+//         setSlots([]);
+//       } finally {
+//         setLoadingSlots(false);
+//       }
+//     };
+
+//     fetchSlots();
+//   }, [tid, slotDate]);
+
+//   // ---------------- HELPER FUNCTIONS ----------------
+//   const getSlotByTime = (time) =>
+//     slots.find((s) => `${s.startTime}–${s.endTime}` === time);
+
+//   const timeSlots = useMemo(() => {
+//     if (slots.length > 0) return slots.map((s) => `${s.startTime}–${s.endTime}`);
+//     if (!turf) return [];
+//     const { minHour, maxHour } = turf;
+//     const arr = [];
+//     for (let h = minHour; h < maxHour; h++) {
+//       const nextH = h + 1;
+//       const fmt = (hour) =>
+//         hour < 12 ? `${hour}:00 AM` : hour === 12 ? "12:00 PM" : `${hour - 12}:00 PM`;
+//       arr.push(`${fmt(h)}–${fmt(nextH)}`);
+//     }
+//     return arr;
+//   }, [slots, turf]);
+
+//   const isSlotBooked = (time) => {
+//     const slot = getSlotByTime(time);
+//     return slot ? slot.isBooked : false;
+//   };
+
+//   const isTournamentSlotAvailable = (time) => {
+//     if (mode !== "tournament") return true;
+//     const slot = getSlotByTime(time);
+//     return slot ? !slot.isBooked : true;
+//   };
+
+//   const toggleSlot = (time) => {
+//     if (isSlotBooked(time)) return;
+//     if (mode === "tournament" && !isTournamentSlotAvailable(time)) return;
+
+//     setSelectedTime((prev) =>
+//       prev.includes(time) ? prev.filter((t) => t !== time) : [...prev, time]
+//     );
+//   };
+
+//   const handleSelectAll = (e) => {
+//     if (e.target.checked) {
+//       const slotsToSelect = timeSlots.filter((slot) => {
+//         if (isSlotBooked(slot)) return false;
+//         if (mode === "tournament" && !isTournamentSlotAvailable(slot)) return false;
+//         return true;
+//       });
+//       setSelectedTime(slotsToSelect);
+//     } else setSelectedTime([]);
+//   };
+
+//   // ---------------- TOTAL CALC ----------------
+//   useEffect(() => {
+//     let pricePerSlot = mode === "tournament" ? turf?.tournamentPrice || 0 : turf?.finalPrice || 0;
+//     setTotalAmount(selectedTime.length * pricePerSlot);
+//   }, [mode, selectedTime, turf]);
+
+//   const handleProceedToPay = () => {
+//     alert(
+//       `Proceeding to pay ₹${totalAmount} for ${selectedTime.length} slots (${mode.toUpperCase()})`
+//     );
+//   };
+
+//   // ---------------- LOADING STATE ----------------
+//   if (loadingTurf || loadingSlots)
+//     return (
+//       <main className="container py-5 text-center">
+//         <div className="spinner-border text-primary"></div>
+//         <p className="mt-3">Loading...</p>
+//       </main>
+//     );
+
+//   if (!turf)
+//     return (
+//       <main className="container py-5">
+//         <div className="alert alert-danger text-center">Turf not found!</div>
+//       </main>
+//     );
+
+//   // ---------------- UI ----------------
+//   return (
+//     <>
+//       <Navbar />
+//       <div className="container py-4">
+//         <div className="row g-4">
+//           {/* Left Booking Card */}
+//           <div className="col-12 col-lg-7">
+//             <div className="card">
+//               <div className="card-body">
+//                 {/* Date & Booking Type */}
+//                 <div className="row g-3">
+//                   <div className="col-12 col-md-6">
+//                     <label className="form-label">Date</label>
+//                     <input
+//                       type="date"
+//                       className="form-control"
+//                       min={getTodayLocal()}
+//                       max={getMaxBookingDate()}
+//                       value={slotDate}
+//                       onChange={(e) => setSlotDate(e.target.value)}
+//                     />
+//                   </div>
+
+//                   <div className="col-12 col-md-6">
+//                     <label className="form-label d-block">Booking Type</label>
+//                     <div className="form-check form-check-inline">
+//                       <input
+//                         className="form-check-input"
+//                         type="radio"
+//                         name="bookingType"
+//                         value="regular"
+//                         checked={mode === "regular"}
+//                         onChange={(e) => setMode(e.target.value)}
+//                       />
+//                       <label className="form-check-label">
+//                         Regular (
+//                         {turf.discountPercent > 0 ? (
+//                           <>
+//                             <span className="text-danger fw-bold">{turf.discountPercent}% OFF</span>{" "}
+//                             <del>₹{turf.price}</del> ₹{turf.finalPrice}/hr
+//                           </>
+//                         ) : (
+//                           <>₹{turf.price}/hr</>
+//                         )}
+//                         )
+//                       </label>
+//                     </div>
+
+//                     {turf.tournamentPrice > 0 && (
+//                       <div className="form-check form-check-inline">
+//                         <input
+//                           className="form-check-input"
+//                           type="radio"
+//                           name="bookingType"
+//                           value="tournament"
+//                           checked={mode === "tournament"}
+//                           onChange={(e) => setMode(e.target.value)}
+//                         />
+//                         <label className="form-check-label">
+//                           Tournament ₹{turf.tournamentPrice}/hr
+//                         </label>
+//                       </div>
+//                     )}
+//                   </div>
+//                 </div>
+
+//                 <hr />
+
+//                 {/* Slots */}
+//                 <label className="form-label d-flex align-items-center gap-2">
+//                   <span>Available Time Slots</span>
+//                   <div className="form-check m-0 ms-auto">
+//                     <input
+//                       className="form-check-input"
+//                       type="checkbox"
+//                       id="selectAllSlots"
+//                       checked={
+//                         selectedTime.length > 0 &&
+//                         selectedTime.length ===
+//                           timeSlots.filter((s) => {
+//                             if (isSlotBooked(s)) return false;
+//                             if (mode === "tournament" && !isTournamentSlotAvailable(s)) return false;
+//                             return true;
+//                           }).length
+//                       }
+//                       onChange={handleSelectAll}
+//                     />
+//                     <label className="form-check-label" htmlFor="selectAllSlots">
+//                       Select all ({timeSlots[0]}–{timeSlots[timeSlots.length - 1]})
+//                     </label>
+//                   </div>
+//                 </label>
+
+//                 <div id="slots" className="d-flex flex-wrap gap-2">
+//                   {timeSlots.map((time) => {
+//                     const isBooked = isSlotBooked(time);
+//                     const isDisabled = isBooked || (mode === "tournament" && !isTournamentSlotAvailable(time));
+//                     const active = selectedTime.includes(time);
+
+//                     return (
+//                       <button
+//                         key={time}
+//                         type="button"
+//                         className={`btn btn-outline-primary ${active ? "active" : ""}`}
+//                         disabled={isDisabled}
+//                         onClick={() => toggleSlot(time)}
+//                         title={
+//                           isBooked
+//                             ? "Already booked"
+//                             : isDisabled
+//                             ? "Not available in selected mode"
+//                             : "Available for booking"
+//                         }
+//                       >
+//                         {time}
+//                       </button>
+//                     );
+//                   })}
+//                 </div>
+//               </div>
+//             </div>
+//           </div>
+
+//           {/* Right Summary Card */}
+//           <aside className="col-12 col-lg-5">
+//             <div className="card">
+//               <div className="card-body">
+//                 <h2 className="h6 text-muted">Summary</h2>
+//                 <ul className="list-unstyled small mb-3">
+//                   <li>
+//                     <strong>Turf:</strong> {turf.name}
+//                   </li>
+//                   <li>
+//                     <strong>Date:</strong> {slotDate}
+//                   </li>
+//                   <li>
+//                     <strong>Type:</strong> {mode}
+//                   </li>
+//                   <li>
+//                     <strong>Time:</strong> {selectedTime.length > 0 ? selectedTime.join(", ") : "—"}
+//                   </li>
+//                   <li>
+//                     <strong>Rate (/slot):</strong> ₹{mode === "tournament" ? turf.tournamentPrice : turf.finalPrice}
+//                   </li>
+//                 </ul>
+
+//                 <div className="d-flex justify-content-between align-items-center">
+//                   <span className="fw-semibold">Total</span>
+//                   <span className="fs-5">₹{totalAmount}</span>
+//                 </div>
+
+//                 <div className="d-grid mt-3">
+//                   <button
+//                     className="btn btn-primary"
+//                     disabled={!slotDate || selectedTime.length === 0}
+//                     onClick={handleProceedToPay}
+//                   >
+//                     Proceed to Pay
+//                   </button>
+//                 </div>
+//               </div>
+//             </div>
+//           </aside>
+//         </div>
+
+//         <footer className="text-center mt-5 mb-3 small text-muted">
+//           © TurfBook 2025 Terms & Conditions
+//         </footer>
+//       </div>
+//     </>
+//   );
+// };
+
+// export default SlotBooking;
+
+
+//----------------------------------------------------------------------------------------------------
 import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
@@ -1915,10 +2281,10 @@ const getTodayLocal = () => {
   return `${yyyy}-${mm}-${dd}`;
 };
 
-// Get max selectable date = today + 29 days
+// Max selectable date = today + 29 days
 const getMaxBookingDate = () => {
   const d = new Date();
-  d.setDate(d.getDate() + 29); // today + 29
+  d.setDate(d.getDate() + 29);
   const yyyy = d.getFullYear();
   const mm = String(d.getMonth() + 1).padStart(2, "0");
   const dd = String(d.getDate()).padStart(2, "0");
@@ -1940,7 +2306,7 @@ const SlotBooking = () => {
   const [loadingSlots, setLoadingSlots] = useState(true);
   const [totalAmount, setTotalAmount] = useState(0);
 
-  // ---------------- AUTH CHECK ----------------
+  // AUTH CHECK
   useEffect(() => {
     if (!getToken()) {
       localStorage.setItem("redirectAfterLogin", window.location.href);
@@ -1948,7 +2314,7 @@ const SlotBooking = () => {
     }
   }, [navigate]);
 
-  // ---------------- FETCH TURF DETAILS ----------------
+  // FETCH TURF DETAILS
   useEffect(() => {
     if (!tid) return;
 
@@ -1958,10 +2324,15 @@ const SlotBooking = () => {
           headers: { Authorization: `Bearer ${getToken()}` },
         });
 
-        // FRONTEND calculates regular finalPrice
         const pricePerHour = res.data.pricePerHour || 0;
-        const discountPercent = res.data.discountPercent || 0;
-        const finalPrice = Math.round(pricePerHour - (pricePerHour * discountPercent) / 100);
+
+        // FIXED HERE — backend sends "discount"
+        const discountPercent = res.data.discount ?? 0;
+
+        // Correct final price calculation
+        const finalPrice = Math.round(
+          pricePerHour - (pricePerHour * discountPercent) / 100
+        );
 
         setTurf({
           id: res.data.turfId,
@@ -1983,16 +2354,19 @@ const SlotBooking = () => {
     fetchTurf();
   }, [tid]);
 
-  // ---------------- FETCH SLOTS ----------------
+  // FETCH SLOTS
   useEffect(() => {
     if (!tid || !slotDate) return;
 
     const fetchSlots = async () => {
       setLoadingSlots(true);
       try {
-        const res = await axios.get(`http://localhost:8088/api/slots/${tid}/${slotDate}`, {
-          headers: { Authorization: `Bearer ${getToken()}` },
-        });
+        const res = await axios.get(
+          `http://localhost:8088/api/slots/${tid}/${slotDate}`,
+          {
+            headers: { Authorization: `Bearer ${getToken()}` },
+          }
+        );
         setSlots(res.data);
         setSelectedTime([]);
       } catch (err) {
@@ -2006,19 +2380,20 @@ const SlotBooking = () => {
     fetchSlots();
   }, [tid, slotDate]);
 
-  // ---------------- HELPER FUNCTIONS ----------------
+  // SLOT TIME FORMAT
   const getSlotByTime = (time) =>
     slots.find((s) => `${s.startTime}–${s.endTime}` === time);
 
   const timeSlots = useMemo(() => {
     if (slots.length > 0) return slots.map((s) => `${s.startTime}–${s.endTime}`);
     if (!turf) return [];
-    const { minHour, maxHour } = turf;
     const arr = [];
-    for (let h = minHour; h < maxHour; h++) {
+    for (let h = turf.minHour; h < turf.maxHour; h++) {
       const nextH = h + 1;
       const fmt = (hour) =>
-        hour < 12 ? `${hour}:00 AM` : hour === 12 ? "12:00 PM" : `${hour - 12}:00 PM`;
+        hour < 12 ? `${hour}:00 AM`
+        : hour === 12 ? "12:00 PM"
+        : `${hour - 12}:00 PM`;
       arr.push(`${fmt(h)}–${fmt(nextH)}`);
     }
     return arr;
@@ -2040,34 +2415,40 @@ const SlotBooking = () => {
     if (mode === "tournament" && !isTournamentSlotAvailable(time)) return;
 
     setSelectedTime((prev) =>
-      prev.includes(time) ? prev.filter((t) => t !== time) : [...prev, time]
+      prev.includes(time)
+        ? prev.filter((t) => t !== time)
+        : [...prev, time]
     );
   };
 
   const handleSelectAll = (e) => {
     if (e.target.checked) {
-      const slotsToSelect = timeSlots.filter((slot) => {
-        if (isSlotBooked(slot)) return false;
-        if (mode === "tournament" && !isTournamentSlotAvailable(slot)) return false;
+      const available = timeSlots.filter((s) => {
+        if (isSlotBooked(s)) return false;
+        if (mode === "tournament" && !isTournamentSlotAvailable(s)) return false;
         return true;
       });
-      setSelectedTime(slotsToSelect);
+      setSelectedTime(available);
     } else setSelectedTime([]);
   };
 
-  // ---------------- TOTAL CALC ----------------
+  // TOTAL PRICE CALC
   useEffect(() => {
-    let pricePerSlot = mode === "tournament" ? turf?.tournamentPrice || 0 : turf?.finalPrice || 0;
-    setTotalAmount(selectedTime.length * pricePerSlot);
+    const price =
+      mode === "tournament"
+        ? turf?.tournamentPrice
+        : turf?.finalPrice;
+
+    setTotalAmount(selectedTime.length * (price || 0));
   }, [mode, selectedTime, turf]);
 
   const handleProceedToPay = () => {
     alert(
-      `Proceeding to pay ₹${totalAmount} for ${selectedTime.length} slots (${mode.toUpperCase()})`
+      `Proceeding to pay ₹${totalAmount} for ${selectedTime.length} slots (${mode})`
     );
   };
 
-  // ---------------- LOADING STATE ----------------
+  // LOADING UI
   if (loadingTurf || loadingSlots)
     return (
       <main className="container py-5 text-center">
@@ -2083,17 +2464,16 @@ const SlotBooking = () => {
       </main>
     );
 
-  // ---------------- UI ----------------
   return (
     <>
       <Navbar />
       <div className="container py-4">
         <div className="row g-4">
-          {/* Left Booking Card */}
+          {/* Left Card */}
           <div className="col-12 col-lg-7">
             <div className="card">
               <div className="card-body">
-                {/* Date & Booking Type */}
+                {/* Date & Type */}
                 <div className="row g-3">
                   <div className="col-12 col-md-6">
                     <label className="form-label">Date</label>
@@ -2109,11 +2489,11 @@ const SlotBooking = () => {
 
                   <div className="col-12 col-md-6">
                     <label className="form-label d-block">Booking Type</label>
+
                     <div className="form-check form-check-inline">
                       <input
                         className="form-check-input"
                         type="radio"
-                        name="bookingType"
                         value="regular"
                         checked={mode === "regular"}
                         onChange={(e) => setMode(e.target.value)}
@@ -2122,7 +2502,9 @@ const SlotBooking = () => {
                         Regular (
                         {turf.discountPercent > 0 ? (
                           <>
-                            <span className="text-danger fw-bold">{turf.discountPercent}% OFF</span>{" "}
+                            <span className="text-danger fw-bold">
+                              {turf.discountPercent}% OFF
+                            </span>{" "}
                             <del>₹{turf.price}</del> ₹{turf.finalPrice}/hr
                           </>
                         ) : (
@@ -2137,7 +2519,6 @@ const SlotBooking = () => {
                         <input
                           className="form-check-input"
                           type="radio"
-                          name="bookingType"
                           value="tournament"
                           checked={mode === "tournament"}
                           onChange={(e) => setMode(e.target.value)}
@@ -2153,50 +2534,44 @@ const SlotBooking = () => {
                 <hr />
 
                 {/* Slots */}
-                <label className="form-label d-flex align-items-center gap-2">
+                <label className="form-label d-flex align-items-center">
                   <span>Available Time Slots</span>
-                  <div className="form-check m-0 ms-auto">
+                  <div className="form-check ms-auto">
                     <input
                       className="form-check-input"
                       type="checkbox"
-                      id="selectAllSlots"
                       checked={
                         selectedTime.length > 0 &&
                         selectedTime.length ===
                           timeSlots.filter((s) => {
                             if (isSlotBooked(s)) return false;
-                            if (mode === "tournament" && !isTournamentSlotAvailable(s)) return false;
+                            if (mode === "tournament" && !isTournamentSlotAvailable(s))
+                              return false;
                             return true;
                           }).length
                       }
                       onChange={handleSelectAll}
                     />
-                    <label className="form-check-label" htmlFor="selectAllSlots">
-                      Select all ({timeSlots[0]}–{timeSlots[timeSlots.length - 1]})
-                    </label>
+                    <label className="form-check-label">Select all</label>
                   </div>
                 </label>
 
-                <div id="slots" className="d-flex flex-wrap gap-2">
+                <div className="d-flex flex-wrap gap-2">
                   {timeSlots.map((time) => {
-                    const isBooked = isSlotBooked(time);
-                    const isDisabled = isBooked || (mode === "tournament" && !isTournamentSlotAvailable(time));
+                    const booked = isSlotBooked(time);
+                    const disabled =
+                      booked ||
+                      (mode === "tournament" && !isTournamentSlotAvailable(time));
                     const active = selectedTime.includes(time);
 
                     return (
                       <button
                         key={time}
-                        type="button"
-                        className={`btn btn-outline-primary ${active ? "active" : ""}`}
-                        disabled={isDisabled}
+                        className={`btn btn-outline-primary ${
+                          active ? "active" : ""
+                        }`}
+                        disabled={disabled}
                         onClick={() => toggleSlot(time)}
-                        title={
-                          isBooked
-                            ? "Already booked"
-                            : isDisabled
-                            ? "Not available in selected mode"
-                            : "Available for booking"
-                        }
                       >
                         {time}
                       </button>
@@ -2207,30 +2582,30 @@ const SlotBooking = () => {
             </div>
           </div>
 
-          {/* Right Summary Card */}
+          {/* Summary */}
           <aside className="col-12 col-lg-5">
             <div className="card">
               <div className="card-body">
                 <h2 className="h6 text-muted">Summary</h2>
-                <ul className="list-unstyled small mb-3">
+
+                <ul className="small list-unstyled mb-3">
+                  <li><strong>Turf:</strong> {turf.name}</li>
+                  <li><strong>Date:</strong> {slotDate}</li>
+                  <li><strong>Type:</strong> {mode}</li>
                   <li>
-                    <strong>Turf:</strong> {turf.name}
+                    <strong>Time:</strong>{" "}
+                    {selectedTime.length ? selectedTime.join(", ") : "—"}
                   </li>
                   <li>
-                    <strong>Date:</strong> {slotDate}
-                  </li>
-                  <li>
-                    <strong>Type:</strong> {mode}
-                  </li>
-                  <li>
-                    <strong>Time:</strong> {selectedTime.length > 0 ? selectedTime.join(", ") : "—"}
-                  </li>
-                  <li>
-                    <strong>Rate (/slot):</strong> ₹{mode === "tournament" ? turf.tournamentPrice : turf.finalPrice}
+                    <strong>Rate:</strong> ₹
+                    {mode === "tournament"
+                      ? turf.tournamentPrice
+                      : turf.finalPrice}
+                    /hr
                   </li>
                 </ul>
 
-                <div className="d-flex justify-content-between align-items-center">
+                <div className="d-flex justify-content-between">
                   <span className="fw-semibold">Total</span>
                   <span className="fs-5">₹{totalAmount}</span>
                 </div>
@@ -2238,7 +2613,7 @@ const SlotBooking = () => {
                 <div className="d-grid mt-3">
                   <button
                     className="btn btn-primary"
-                    disabled={!slotDate || selectedTime.length === 0}
+                    disabled={selectedTime.length === 0}
                     onClick={handleProceedToPay}
                   >
                     Proceed to Pay
@@ -2250,7 +2625,7 @@ const SlotBooking = () => {
         </div>
 
         <footer className="text-center mt-5 mb-3 small text-muted">
-          © TurfBook 2025 Terms & Conditions
+          © TurfBook 2025
         </footer>
       </div>
     </>
