@@ -96,8 +96,12 @@ const App = () => {
           <Route path="/admin-dashboard" element={<AdminDashboard />} />
 
           {/* ✅ CORRECT ROUTE */}
-          <Route path="/owner-details/:id" element={<OwnerDetails />} />
+          <Route path="/owner/edit-turf" element={<OwnerEditTurf />} />
 
+          <Route path="/owner-details/:id" element={<OwnerDetails />} />
+          {/* <Route path="/owner-slot-booking/:turfId" element={<OwnerSlotBooking />} /> */}
+
+   <Route path="/owner/slots/:turfId" element={<OwnerSlotBooking />} />
           <Route path="/admin-owner" element={<AdminOwners />} />
 
           {/* ❗ FIXED: replaced wrong /owner-details */}

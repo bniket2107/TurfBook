@@ -2266,13 +2266,718 @@
 
 
 //----------------------------------------------------------------------------------------------------
-import React, { useState, useEffect, useMemo } from "react";
+// import React, { useState, useEffect, useMemo } from "react";
+// import { useNavigate, useLocation } from "react-router-dom";
+// import axios from "axios";
+// import Navbar from "../components/Navbar";
+// import { getToken } from "../utils/Auth";
+
+// // Get today's date in yyyy-mm-dd
+// const getTodayLocal = () => {
+//   const d = new Date();
+//   const yyyy = d.getFullYear();
+//   const mm = String(d.getMonth() + 1).padStart(2, "0");
+//   const dd = String(d.getDate()).padStart(2, "0");
+//   return `${yyyy}-${mm}-${dd}`;
+// };
+
+// // Max selectable date = today + 29 days
+// const getMaxBookingDate = () => {
+//   const d = new Date();
+//   d.setDate(d.getDate() + 29);
+//   const yyyy = d.getFullYear();
+//   const mm = String(d.getMonth() + 1).padStart(2, "0");
+//   const dd = String(d.getDate()).padStart(2, "0");
+//   return `${yyyy}-${mm}-${dd}`;
+// };
+
+// const SlotBooking = () => {
+//   const navigate = useNavigate();
+//   const location = useLocation();
+//   const search = useMemo(() => new URLSearchParams(location.search), [location.search]);
+//   const tid = search.get("tid");
+
+//   const [turf, setTurf] = useState(null);
+//   const [slotDate, setSlotDate] = useState(getTodayLocal());
+//   const [slots, setSlots] = useState([]);
+//   const [selectedTime, setSelectedTime] = useState([]);
+//   const [mode, setMode] = useState("regular");
+//   const [loadingTurf, setLoadingTurf] = useState(true);
+//   const [loadingSlots, setLoadingSlots] = useState(true);
+//   const [totalAmount, setTotalAmount] = useState(0);
+
+//   // AUTH CHECK
+//   useEffect(() => {
+//     if (!getToken()) {
+//       localStorage.setItem("redirectAfterLogin", window.location.href);
+//       navigate("/login");
+//     }
+//   }, [navigate]);
+
+//   // FETCH TURF DETAILS
+//   useEffect(() => {
+//     if (!tid) return;
+
+//     const fetchTurf = async () => {
+//       try {
+//         const res = await axios.get(`http://localhost:8088/api/turfs/${tid}`, {
+//           headers: { Authorization: `Bearer ${getToken()}` },
+//         });
+
+//         const pricePerHour = res.data.pricePerHour || 0;
+
+//         // FIXED HERE — backend sends "discount"
+//         const discountPercent = res.data.discount ?? 0;
+
+//         // Correct final price calculation
+//         const finalPrice = Math.round(
+//           pricePerHour - (pricePerHour * discountPercent) / 100
+//         );
+
+//         setTurf({
+//           id: res.data.turfId,
+//           name: res.data.turfName,
+//           price: pricePerHour,
+//           discountPercent,
+//           finalPrice,
+//           tournamentPrice: res.data.tournamentSlotPrice,
+//           minHour: res.data.minHour || 6,
+//           maxHour: res.data.maxHour || 22,
+//         });
+//       } catch (err) {
+//         console.error("Error fetching turf details:", err);
+//       } finally {
+//         setLoadingTurf(false);
+//       }
+//     };
+
+//     fetchTurf();
+//   }, [tid]);
+
+//   // FETCH SLOTS
+//   useEffect(() => {
+//     if (!tid || !slotDate) return;
+
+//     const fetchSlots = async () => {
+//       setLoadingSlots(true);
+//       try {
+//         const res = await axios.get(
+//           `http://localhost:8088/api/slots/${tid}/${slotDate}`,
+//           {
+//             headers: { Authorization: `Bearer ${getToken()}` },
+//           }
+//         );
+//         setSlots(res.data);
+//         setSelectedTime([]);
+//       } catch (err) {
+//         console.error("Error fetching slots:", err);
+//         setSlots([]);
+//       } finally {
+//         setLoadingSlots(false);
+//       }
+//     };
+
+//     fetchSlots();
+//   }, [tid, slotDate]);
+
+//   // SLOT TIME FORMAT
+//   const getSlotByTime = (time) =>
+//     slots.find((s) => `${s.startTime}–${s.endTime}` === time);
+
+//   const timeSlots = useMemo(() => {
+//     if (slots.length > 0) return slots.map((s) => `${s.startTime}–${s.endTime}`);
+//     if (!turf) return [];
+//     const arr = [];
+//     for (let h = turf.minHour; h < turf.maxHour; h++) {
+//       const nextH = h + 1;
+//       const fmt = (hour) =>
+//         hour < 12 ? `${hour}:00 AM`
+//         : hour === 12 ? "12:00 PM"
+//         : `${hour - 12}:00 PM`;
+//       arr.push(`${fmt(h)}–${fmt(nextH)}`);
+//     }
+//     return arr;
+//   }, [slots, turf]);
+
+//   const isSlotBooked = (time) => {
+//     const slot = getSlotByTime(time);
+//     return slot ? slot.isBooked : false;
+//   };
+
+//   const isTournamentSlotAvailable = (time) => {
+//     if (mode !== "tournament") return true;
+//     const slot = getSlotByTime(time);
+//     return slot ? !slot.isBooked : true;
+//   };
+
+//   const toggleSlot = (time) => {
+//     if (isSlotBooked(time)) return;
+//     if (mode === "tournament" && !isTournamentSlotAvailable(time)) return;
+
+//     setSelectedTime((prev) =>
+//       prev.includes(time)
+//         ? prev.filter((t) => t !== time)
+//         : [...prev, time]
+//     );
+//   };
+
+//   const handleSelectAll = (e) => {
+//     if (e.target.checked) {
+//       const available = timeSlots.filter((s) => {
+//         if (isSlotBooked(s)) return false;
+//         if (mode === "tournament" && !isTournamentSlotAvailable(s)) return false;
+//         return true;
+//       });
+//       setSelectedTime(available);
+//     } else setSelectedTime([]);
+//   };
+
+//   // TOTAL PRICE CALC
+//   useEffect(() => {
+//     const price =
+//       mode === "tournament"
+//         ? turf?.tournamentPrice
+//         : turf?.finalPrice;
+
+//     setTotalAmount(selectedTime.length * (price || 0));
+//   }, [mode, selectedTime, turf]);
+
+//   const handleProceedToPay = () => {
+//     alert(
+//       `Proceeding to pay ₹${totalAmount} for ${selectedTime.length} slots (${mode})`
+//     );
+//   };
+
+//   // LOADING UI
+//   if (loadingTurf || loadingSlots)
+//     return (
+//       <main className="container py-5 text-center">
+//         <div className="spinner-border text-primary"></div>
+//         <p className="mt-3">Loading...</p>
+//       </main>
+//     );
+
+//   if (!turf)
+//     return (
+//       <main className="container py-5">
+//         <div className="alert alert-danger text-center">Turf not found!</div>
+//       </main>
+//     );
+
+//   return (
+//     <>
+//       <Navbar />
+//       <div className="container py-4">
+//         <div className="row g-4">
+//           {/* Left Card */}
+//           <div className="col-12 col-lg-7">
+//             <div className="card">
+//               <div className="card-body">
+//                 {/* Date & Type */}
+//                 <div className="row g-3">
+//                   <div className="col-12 col-md-6">
+//                     <label className="form-label">Date</label>
+//                     <input
+//                       type="date"
+//                       className="form-control"
+//                       min={getTodayLocal()}
+//                       max={getMaxBookingDate()}
+//                       value={slotDate}
+//                       onChange={(e) => setSlotDate(e.target.value)}
+//                     />
+//                   </div>
+
+//                   <div className="col-12 col-md-6">
+//                     <label className="form-label d-block">Booking Type</label>
+
+//                     <div className="form-check form-check-inline">
+//                       <input
+//                         className="form-check-input"
+//                         type="radio"
+//                         value="regular"
+//                         checked={mode === "regular"}
+//                         onChange={(e) => setMode(e.target.value)}
+//                       />
+//                       <label className="form-check-label">
+//                         Regular (
+//                         {turf.discountPercent > 0 ? (
+//                           <>
+//                             <span className="text-danger fw-bold">
+//                               {turf.discountPercent}% OFF
+//                             </span>{" "}
+//                             <del>₹{turf.price}</del> ₹{turf.finalPrice}/hr
+//                           </>
+//                         ) : (
+//                           <>₹{turf.price}/hr</>
+//                         )}
+//                         )
+//                       </label>
+//                     </div>
+
+//                     {turf.tournamentPrice > 0 && (
+//                       <div className="form-check form-check-inline">
+//                         <input
+//                           className="form-check-input"
+//                           type="radio"
+//                           value="tournament"
+//                           checked={mode === "tournament"}
+//                           onChange={(e) => setMode(e.target.value)}
+//                         />
+//                         <label className="form-check-label">
+//                           Tournament ₹{turf.tournamentPrice}/hr
+//                         </label>
+//                       </div>
+//                     )}
+//                   </div>
+//                 </div>
+
+//                 <hr />
+
+//                 {/* Slots */}
+//                 <label className="form-label d-flex align-items-center">
+//                   <span>Available Time Slots</span>
+//                   <div className="form-check ms-auto">
+//                     <input
+//                       className="form-check-input"
+//                       type="checkbox"
+//                       checked={
+//                         selectedTime.length > 0 &&
+//                         selectedTime.length ===
+//                           timeSlots.filter((s) => {
+//                             if (isSlotBooked(s)) return false;
+//                             if (mode === "tournament" && !isTournamentSlotAvailable(s))
+//                               return false;
+//                             return true;
+//                           }).length
+//                       }
+//                       onChange={handleSelectAll}
+//                     />
+//                     <label className="form-check-label">Select all</label>
+//                   </div>
+//                 </label>
+
+//                 <div className="d-flex flex-wrap gap-2">
+//                   {timeSlots.map((time) => {
+//                     const booked = isSlotBooked(time);
+//                     const disabled =
+//                       booked ||
+//                       (mode === "tournament" && !isTournamentSlotAvailable(time));
+//                     const active = selectedTime.includes(time);
+
+//                     return (
+//                       <button
+//                         key={time}
+//                         className={`btn btn-outline-primary ${
+//                           active ? "active" : ""
+//                         }`}
+//                         disabled={disabled}
+//                         onClick={() => toggleSlot(time)}
+//                       >
+//                         {time}
+//                       </button>
+//                     );
+//                   })}
+//                 </div>
+//               </div>
+//             </div>
+//           </div>
+
+//           {/* Summary */}
+//           <aside className="col-12 col-lg-5">
+//             <div className="card">
+//               <div className="card-body">
+//                 <h2 className="h6 text-muted">Summary</h2>
+
+//                 <ul className="small list-unstyled mb-3">
+//                   <li><strong>Turf:</strong> {turf.name}</li>
+//                   <li><strong>Date:</strong> {slotDate}</li>
+//                   <li><strong>Type:</strong> {mode}</li>
+//                   <li>
+//                     <strong>Time:</strong>{" "}
+//                     {selectedTime.length ? selectedTime.join(", ") : "—"}
+//                   </li>
+//                   <li>
+//                     <strong>Rate:</strong> ₹
+//                     {mode === "tournament"
+//                       ? turf.tournamentPrice
+//                       : turf.finalPrice}
+//                     /hr
+//                   </li>
+//                 </ul>
+
+//                 <div className="d-flex justify-content-between">
+//                   <span className="fw-semibold">Total</span>
+//                   <span className="fs-5">₹{totalAmount}</span>
+//                 </div>
+
+//                 <div className="d-grid mt-3">
+//                   <button
+//                     className="btn btn-primary"
+//                     disabled={selectedTime.length === 0}
+//                     onClick={handleProceedToPay}
+//                   >
+//                     Proceed to Pay
+//                   </button>
+//                 </div>
+//               </div>
+//             </div>
+//           </aside>
+//         </div>
+
+//         <footer className="text-center mt-5 mb-3 small text-muted">
+//           © TurfBook 2025
+//         </footer>
+//       </div>
+//     </>
+//   );
+// };
+
+// export default SlotBooking;
+
+//--------------------------------------------------------------------------
+// import React, { useState, useEffect, useMemo } from "react";
+// import { useNavigate, useLocation } from "react-router-dom";
+// import axios from "axios";
+// import Navbar from "../components/Navbar";
+// import { getToken } from "../utils/Auth";
+
+// // TODAY DATE
+// const getTodayLocal = () => {
+//   const d = new Date();
+//   return d.toISOString().split("T")[0];
+// };
+
+// // MAX DATE = +29 DAYS
+// const getMaxBookingDate = () => {
+//   const d = new Date();
+//   d.setDate(d.getDate() + 29);
+//   return d.toISOString().split("T")[0];
+// };
+
+// const SlotBooking = () => {
+//   const navigate = useNavigate();
+//   const location = useLocation();
+//   const params = useMemo(() => new URLSearchParams(location.search), [location]);
+//   const tid = params.get("tid");
+
+//   const [turf, setTurf] = useState(null);
+//   const [slotDate, setSlotDate] = useState(getTodayLocal());
+//   const [slots, setSlots] = useState([]);
+//   const [selectedTime, setSelectedTime] = useState([]);
+//   const [mode, setMode] = useState("regular");
+
+//   const [loadingTurf, setLoadingTurf] = useState(true);
+//   const [loadingSlots, setLoadingSlots] = useState(true);
+//   const [totalAmount, setTotalAmount] = useState(0);
+
+//   // REQUIRE LOGIN
+//   useEffect(() => {
+//     if (!getToken()) {
+//       localStorage.setItem("redirectAfterLogin", window.location.href);
+//       navigate("/login");
+//     }
+//   }, [navigate]);
+
+//   // FETCH TURF DETAILS
+//   useEffect(() => {
+//     if (!tid) return;
+
+//     const fetchTurf = async () => {
+//       try {
+//         const res = await axios.get(`http://localhost:8088/api/turfs/${tid}`, {
+//           headers: { Authorization: `Bearer ${getToken()}` },
+//         });
+
+//         const pricePerHour = res.data.pricePerHour || 0;
+//         const discountPercent = res.data.discount ?? 0;
+
+//         const finalPrice = Math.round(
+//           pricePerHour - (pricePerHour * discountPercent) / 100
+//         );
+
+//         setTurf({
+//           id: res.data.turfId,
+//           name: res.data.turfName,
+//           price: pricePerHour,
+//           discountPercent,
+//           finalPrice,
+//           tournamentPrice: res.data.tournamentSlotPrice || 0,
+//           minHour: res.data.minHour || 6,
+//           maxHour: res.data.maxHour || 22,
+//         });
+//       } catch (err) {
+//         console.error("Error loading turf:", err);
+//       } finally {
+//         setLoadingTurf(false);
+//       }
+//     };
+
+//     fetchTurf();
+//   }, [tid]);
+
+//   // FETCH SLOTS
+//   useEffect(() => {
+//     if (!tid || !slotDate) return;
+
+//     const fetchSlots = async () => {
+//       setLoadingSlots(true);
+//       try {
+//         const res = await axios.get(
+//           `http://localhost:8088/api/slots/${tid}/${slotDate}`,
+//           {
+//             headers: { Authorization: `Bearer ${getToken()}` },
+//           }
+//         );
+//         setSlots(res.data);
+//         setSelectedTime([]);
+//       } catch (err) {
+//         console.error("Error loading slots:", err);
+//         setSlots([]);
+//       } finally {
+//         setLoadingSlots(false);
+//       }
+//     };
+
+//     fetchSlots();
+//   }, [tid, slotDate]);
+
+//   // --------------------------------------------------------------------
+//   // SLOT CHECK FUNCTIONS
+//   // --------------------------------------------------------------------
+//   const getSlotByTime = (time) =>
+//     slots.find((s) => `${s.startTime}–${s.endTime}` === time);
+
+//   const isSlotBooked = (time) => getSlotByTime(time)?.isBooked === true;
+//   const isSlotFrozen = (time) => getSlotByTime(time)?.isBooked === null;
+
+//   const timeSlots = useMemo(() => {
+//     if (slots.length > 0) return slots.map((s) => `${s.startTime}–${s.endTime}`);
+
+//     if (!turf) return [];
+//     const arr = [];
+
+//     for (let h = turf.minHour; h < turf.maxHour; h++) {
+//       const next = h + 1;
+//       const fmt = (hr) =>
+//         hr < 12 ? `${hr}:00 AM` : hr === 12 ? `12:00 PM` : `${hr - 12}:00 PM`;
+//       arr.push(`${fmt(h)}–${fmt(next)}`);
+//     }
+
+//     return arr;
+//   }, [slots, turf]);
+
+//   // ----------------------------------------------------
+//   // SELECT SLOT (Block booked & frozen)
+//   // ----------------------------------------------------
+//   const toggleSlot = (time) => {
+//     if (isSlotBooked(time) || isSlotFrozen(time)) return;
+
+//     setSelectedTime((prev) =>
+//       prev.includes(time) ? prev.filter((t) => t !== time) : [...prev, time]
+//     );
+//   };
+
+//   // ----------------------------------------------------
+//   // SELECT ALL
+//   // ----------------------------------------------------
+//   const handleSelectAll = (e) => {
+//     if (e.target.checked) {
+//       const available = timeSlots.filter((t) => !isSlotBooked(t) && !isSlotFrozen(t));
+//       setSelectedTime(available);
+//     } else {
+//       setSelectedTime([]);
+//     }
+//   };
+
+//   // ----------------------------------------------------
+//   // CALCULATE TOTAL
+//   // ----------------------------------------------------
+//   useEffect(() => {
+//     const price =
+//       mode === "tournament" ? turf?.tournamentPrice || 0 : turf?.finalPrice || 0;
+
+//     setTotalAmount(selectedTime.length * price);
+//   }, [selectedTime, mode, turf]);
+
+//   const handleProceedToPay = () => {
+//     alert(
+//       `Proceeding to payment\n₹${totalAmount} for ${selectedTime.length} slots`
+//     );
+//   };
+
+//   // ----------------------------------------------------
+//   // LOADING UI
+//   // ----------------------------------------------------
+//   if (loadingTurf || loadingSlots)
+//     return (
+//       <main className="container py-5 text-center">
+//         <div className="spinner-border text-primary"></div>
+//         <p>Loading...</p>
+//       </main>
+//     );
+
+//   if (!turf)
+//     return (
+//       <div className="container py-5 text-center">
+//         <div className="alert alert-danger">Turf not found!</div>
+//       </div>
+//     );
+
+//   // --------------------------------------------------------------------
+//   // MAIN UI
+//   // --------------------------------------------------------------------
+//   return (
+//     <>
+//       <Navbar />
+//       <div className="container py-4">
+//         <div className="row g-4">
+//           {/* LEFT CARD */}
+//           <div className="col-lg-7">
+//             <div className="card">
+//               <div className="card-body">
+//                 {/* DATE & TYPE */}
+//                 <div className="row g-3">
+//                   <div className="col-md-6">
+//                     <label className="form-label">Date</label>
+//                     <input
+//                       type="date"
+//                       className="form-control"
+//                       min={getTodayLocal()}
+//                       max={getMaxBookingDate()}
+//                       value={slotDate}
+//                       onChange={(e) => setSlotDate(e.target.value)}
+//                     />
+//                   </div>
+
+//                   <div className="col-md-6">
+//                     <label className="form-label">Type</label>
+
+//                     <div className="form-check">
+//                       <input
+//                         className="form-check-input"
+//                         type="radio"
+//                         checked={mode === "regular"}
+//                         onChange={() => setMode("regular")}
+//                       />
+//                       <label className="form-check-label">
+//                         Regular – ₹{turf.finalPrice}/hr
+//                       </label>
+//                     </div>
+
+//                     {turf.tournamentPrice > 0 && (
+//                       <div className="form-check mt-1">
+//                         <input
+//                           className="form-check-input"
+//                           type="radio"
+//                           checked={mode === "tournament"}
+//                           onChange={() => setMode("tournament")}
+//                         />
+//                         <label className="form-check-label">
+//                           Tournament – ₹{turf.tournamentPrice}/hr
+//                         </label>
+//                       </div>
+//                     )}
+//                   </div>
+//                 </div>
+
+//                 <hr />
+
+//                 {/* SLOTS */}
+//                 <div className="d-flex align-items-center">
+//                   <strong>Slots</strong>
+//                   <div className="form-check ms-auto">
+//                     <input
+//                       type="checkbox"
+//                       className="form-check-input"
+//                       onChange={handleSelectAll}
+//                       checked={
+//                         selectedTime.length > 0 &&
+//                         selectedTime.length ===
+//                           timeSlots.filter((t) => !isSlotBooked(t) && !isSlotFrozen(t)).length
+//                       }
+//                     />
+//                     <label className="form-check-label">Select all</label>
+//                   </div>
+//                 </div>
+
+//                 <div className="d-flex flex-wrap mt-3 gap-2">
+//                   {timeSlots.map((time) => {
+//                     const booked = isSlotBooked(time);
+//                     const frozen = isSlotFrozen(time);
+//                     const active = selectedTime.includes(time);
+
+//                     return (
+//                       <button
+//                         key={time}
+//                         className={`btn ${
+//                           booked
+//                             ? "btn-danger"
+//                             : frozen
+//                             ? "btn-secondary"
+//                             : active
+//                             ? "btn-primary"
+//                             : "btn-outline-primary"
+//                         }`}
+//                         disabled={booked || frozen}
+//                         onClick={() => toggleSlot(time)}
+//                       >
+//                         {time}
+//                       </button>
+//                     );
+//                   })}
+//                 </div>
+//               </div>
+//             </div>
+//           </div>
+
+//           {/* SUMMARY */}
+//           <aside className="col-lg-5">
+//             <div className="card">
+//               <div className="card-body">
+//                 <h6 className="text-muted">Summary</h6>
+
+//                 <ul className="list-unstyled small">
+//                   <li><strong>Turf:</strong> {turf.name}</li>
+//                   <li><strong>Date:</strong> {slotDate}</li>
+//                   <li><strong>Type:</strong> {mode}</li>
+//                   <li>
+//                     <strong>Time:</strong>{" "}
+//                     {selectedTime.length ? selectedTime.join(", ") : "—"}
+//                   </li>
+//                 </ul>
+
+//                 <div className="d-flex justify-content-between">
+//                   <span>Total</span>
+//                   <span className="fs-5 fw-bold">₹{totalAmount}</span>
+//                 </div>
+
+//                 <button
+//                   className="btn btn-primary w-100 mt-3"
+//                   disabled={selectedTime.length === 0}
+//                   onClick={handleProceedToPay}
+//                 >
+//                   Proceed to Pay
+//                 </button>
+//               </div>
+//             </div>
+//           </aside>
+//         </div>
+//       </div>
+//     </>
+//   );
+// };
+
+// export default SlotBooking;
+
+// //---------------------------------------------------------------------------------------------
+
+import React, { useState, useEffect, useMemo } from "react"; 
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import Navbar from "../components/Navbar";
 import { getToken } from "../utils/Auth";
 
-// Get today's date in yyyy-mm-dd
+// Get today's date in yyyy-mm-dd format
 const getTodayLocal = () => {
   const d = new Date();
   const yyyy = d.getFullYear();
@@ -2298,7 +3003,7 @@ const SlotBooking = () => {
   const tid = search.get("tid");
 
   const [turf, setTurf] = useState(null);
-  const [slotDate, setSlotDate] = useState(getTodayLocal());
+  const [slotDate, setSlotDate] = useState(getTodayLocal()); // Default to today's date
   const [slots, setSlots] = useState([]);
   const [selectedTime, setSelectedTime] = useState([]);
   const [mode, setMode] = useState("regular");
@@ -2306,7 +3011,7 @@ const SlotBooking = () => {
   const [loadingSlots, setLoadingSlots] = useState(true);
   const [totalAmount, setTotalAmount] = useState(0);
 
-  // AUTH CHECK
+  // REQUIRE LOGIN
   useEffect(() => {
     if (!getToken()) {
       localStorage.setItem("redirectAfterLogin", window.location.href);
@@ -2341,8 +3046,8 @@ const SlotBooking = () => {
           discountPercent,
           finalPrice,
           tournamentPrice: res.data.tournamentSlotPrice,
-          minHour: res.data.minHour || 6,
-          maxHour: res.data.maxHour || 22,
+          minHour: res.data.minHour || 6, // Starting hour for available slots
+          maxHour: res.data.maxHour || 22, // Ending hour for available slots
         });
       } catch (err) {
         console.error("Error fetching turf details:", err);
@@ -2353,6 +3058,23 @@ const SlotBooking = () => {
 
     fetchTurf();
   }, [tid]);
+
+  // GENERATE TIME SLOTS BASED ON minHour & maxHour
+  const generateTimeSlots = (minHour, maxHour) => {
+    const slots = [];
+    for (let h = minHour; h < maxHour; h++) {
+      const nextH = h + 1;
+      const fmt = (hour) => {
+        return hour < 12
+          ? `${hour}:00 AM`
+          : hour === 12
+          ? "12:00 PM"
+          : `${hour - 12}:00 PM`;
+      };
+      slots.push(`${fmt(h)}–${fmt(nextH)}`);
+    }
+    return slots;
+  };
 
   // FETCH SLOTS
   useEffect(() => {
@@ -2368,7 +3090,7 @@ const SlotBooking = () => {
           }
         );
         setSlots(res.data);
-        setSelectedTime([]);
+        setSelectedTime([]); // Reset selected slots
       } catch (err) {
         console.error("Error fetching slots:", err);
         setSlots([]);
@@ -2387,33 +3109,22 @@ const SlotBooking = () => {
   const timeSlots = useMemo(() => {
     if (slots.length > 0) return slots.map((s) => `${s.startTime}–${s.endTime}`);
     if (!turf) return [];
-    const arr = [];
-    for (let h = turf.minHour; h < turf.maxHour; h++) {
-      const nextH = h + 1;
-      const fmt = (hour) =>
-        hour < 12 ? `${hour}:00 AM`
-        : hour === 12 ? "12:00 PM"
-        : `${hour - 12}:00 PM`;
-      arr.push(`${fmt(h)}–${fmt(nextH)}`);
-    }
-    return arr;
+
+    return generateTimeSlots(turf.minHour, turf.maxHour); // Dynamically generate time slots
   }, [slots, turf]);
 
   const isSlotBooked = (time) => {
     const slot = getSlotByTime(time);
-    return slot ? slot.isBooked : false;
+    return slot ? slot.isBooked === true : false;  // Check for booked slot
   };
 
-  const isTournamentSlotAvailable = (time) => {
-    if (mode !== "tournament") return true;
+  const isSlotFrozen = (time) => {
     const slot = getSlotByTime(time);
-    return slot ? !slot.isBooked : true;
+    return slot ? slot.isBooked === null : false;  // Check for frozen slot
   };
 
   const toggleSlot = (time) => {
-    if (isSlotBooked(time)) return;
-    if (mode === "tournament" && !isTournamentSlotAvailable(time)) return;
-
+    if (isSlotBooked(time) || isSlotFrozen(time)) return; // Disable selection for booked and frozen slots
     setSelectedTime((prev) =>
       prev.includes(time)
         ? prev.filter((t) => t !== time)
@@ -2424,8 +3135,7 @@ const SlotBooking = () => {
   const handleSelectAll = (e) => {
     if (e.target.checked) {
       const available = timeSlots.filter((s) => {
-        if (isSlotBooked(s)) return false;
-        if (mode === "tournament" && !isTournamentSlotAvailable(s)) return false;
+        if (isSlotBooked(s) || isSlotFrozen(s)) return false;
         return true;
       });
       setSelectedTime(available);
@@ -2440,7 +3150,7 @@ const SlotBooking = () => {
         : turf?.finalPrice;
 
     setTotalAmount(selectedTime.length * (price || 0));
-  }, [mode, selectedTime, turf]);
+  }, [selectedTime, mode, turf]);
 
   const handleProceedToPay = () => {
     alert(
@@ -2483,7 +3193,7 @@ const SlotBooking = () => {
                       min={getTodayLocal()}
                       max={getMaxBookingDate()}
                       value={slotDate}
-                      onChange={(e) => setSlotDate(e.target.value)}
+                      onChange={(e) => setSlotDate(e.target.value)} // Ensure the selected date is updated
                     />
                   </div>
 
@@ -2540,16 +3250,10 @@ const SlotBooking = () => {
                     <input
                       className="form-check-input"
                       type="checkbox"
-                      checked={
-                        selectedTime.length > 0 &&
-                        selectedTime.length ===
-                          timeSlots.filter((s) => {
-                            if (isSlotBooked(s)) return false;
-                            if (mode === "tournament" && !isTournamentSlotAvailable(s))
-                              return false;
-                            return true;
-                          }).length
-                      }
+                      checked={selectedTime.length > 0 && selectedTime.length === timeSlots.filter((t) => {
+                        if (isSlotBooked(t) || isSlotFrozen(t)) return false;
+                        return true;
+                      }).length}
                       onChange={handleSelectAll}
                     />
                     <label className="form-check-label">Select all</label>
@@ -2559,17 +3263,14 @@ const SlotBooking = () => {
                 <div className="d-flex flex-wrap gap-2">
                   {timeSlots.map((time) => {
                     const booked = isSlotBooked(time);
-                    const disabled =
-                      booked ||
-                      (mode === "tournament" && !isTournamentSlotAvailable(time));
+                    const frozen = isSlotFrozen(time);
+                    const disabled = booked || frozen;
                     const active = selectedTime.includes(time);
 
                     return (
                       <button
                         key={time}
-                        className={`btn btn-outline-primary ${
-                          active ? "active" : ""
-                        }`}
+                        className={`btn btn-outline-primary ${active ? "active" : ""} ${booked ? "btn-danger" : ""} ${frozen ? "btn-secondary" : ""}`}
                         disabled={disabled}
                         onClick={() => toggleSlot(time)}
                       >
